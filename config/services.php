@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    'pakasir' => [
+        'project_slug' => env('PAKASIR_PROJECT_SLUG'),
+        'api_key' => env('PAKASIR_API_KEY'),
+        'sandbox' => env('PAKASIR_SANDBOX', true),
+        'base_url' => env('PAKASIR_BASE_URL', 'https://app.pakasir.com'),
+        'methods' => [
+            'qris' => ['label' => 'QRIS', 'group' => 'QRIS'],
+            'cimb_niaga_va' => ['label' => 'CIMB Niaga VA', 'group' => 'Virtual Account'],
+            'bni_va' => ['label' => 'BNI VA', 'group' => 'Virtual Account'],
+            'sampoerna_va' => ['label' => 'Sampoerna VA', 'group' => 'Virtual Account'],
+            'bnc_va' => ['label' => 'BNC VA', 'group' => 'Virtual Account'],
+            'maybank_va' => ['label' => 'Maybank VA', 'group' => 'Virtual Account'],
+            'permata_va' => ['label' => 'Permata VA', 'group' => 'Virtual Account'],
+            'atm_bersama_va' => ['label' => 'ATM Bersama VA', 'group' => 'Virtual Account'],
+            'artha_graha_va' => ['label' => 'Artha Graha VA', 'group' => 'Virtual Account'],
+            'bri_va' => ['label' => 'BRI VA', 'group' => 'Virtual Account'],
+            'paypal' => ['label' => 'Paypal', 'group' => 'Paypal'],
+        ],
+    ],
+
 ];

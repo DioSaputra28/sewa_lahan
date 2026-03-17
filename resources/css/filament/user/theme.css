@@ -1,0 +1,14 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/User/**/*';
+@source '../../../../resources/views/filament/user/**/*';
+@source '../../../../resources/views/components/filament/user/**/*';
+
+@theme {
+    --color-user-accent: oklch(0.78 0.14 78);
+    --color-user-ink: oklch(0.28 0.03 240);
+    --color-primary: #47eb7e;
+    --color-background-light: #f6f8f6;
+    --color-background-dark: #112116;
+    --font-display: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+}

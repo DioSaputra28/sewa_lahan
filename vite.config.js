@@ -7,13 +7,17 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: ['resources/css/app.css', 'resources/css/filament/user/theme.css', 'resources/js/app.js'],
             refresh: true,
         }),
         tailwindcss(),
     ],
     server: {
+        host: '127.0.0.1',
         cors: true,
+        hmr: {
+            host: '127.0.0.1',
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },
