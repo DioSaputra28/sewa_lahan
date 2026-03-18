@@ -6,9 +6,11 @@ use App\Actions\ActivityLogs\WriteOperationalActivityLog;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentAttempt;
+use App\Notifications\SendInvoicePaymentLink;
 use App\Services\PakasirService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use RuntimeException;
 
 class CreatePakasirPaymentAttempt
@@ -131,6 +133,18 @@ class CreatePakasirPaymentAttempt
                     ]),
                 ],
             );
+
+            $invoice->loadMissing(['user', 'bookingRequest.plot']);
+            $paymentAttempt->refresh();
+
+            if ($invoice->user && filled($paymentAttempt->checkout_url)) {
+                DB::afterCommit(function () use ($invoice, $paymentAttempt): void {
+                    Notification::send(
+                        $invoice->user,
+                        new SendInvoicePaymentLink($invoice, $paymentAttempt),
+                    );
+                });
+            }
 
             return $payment->refresh();
         });

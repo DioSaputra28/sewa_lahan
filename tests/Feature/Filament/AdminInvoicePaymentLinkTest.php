@@ -10,7 +10,9 @@ use App\Models\PaymentAttempt;
 use App\Models\Plot;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\SendInvoicePaymentLink;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -21,6 +23,7 @@ it('allows admin to create a hosted payment link without choosing a method', fun
     config()->set('services.pakasir.api_key', 'demo-key');
     config()->set('services.pakasir.sandbox', true);
     config()->set('services.pakasir.base_url', 'https://app.pakasir.com');
+    Notification::fake();
 
     $adminRole = Role::query()->firstOrCreate(['name' => 'admin']);
     $admin = User::factory()->create([
@@ -115,4 +118,16 @@ it('allows admin to create a hosted payment link without choosing a method', fun
 
     expect(PaymentAttempt::query()->where('invoice_id', $invoice->id)->first()?->checkout_url)
         ->toBe('https://app.pakasir.com/pay/demo-project/12000000?order_id=INV-ADMIN-LINK-001');
+
+    Notification::assertSentTo(
+        $customer,
+        SendInvoicePaymentLink::class,
+        function (SendInvoicePaymentLink $notification, array $channels) use ($customer): bool {
+            $mailMessage = $notification->toMail($customer);
+
+            return in_array('mail', $channels, true)
+                && str_contains((string) $mailMessage->subject, 'invoice siap dibayar')
+                && str_contains((string) $mailMessage->actionUrl, 'INV-ADMIN-LINK-001');
+        },
+    );
 });
