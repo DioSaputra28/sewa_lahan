@@ -40,9 +40,19 @@
                 Remember for 30 days
             </label>
 
-        <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#47eb7e] px-4 py-3 font-bold text-[#112116] transition hover:brightness-95">
-            <span>Login to Dashboard</span>
-            <x-filament::icon icon="heroicon-m-arrow-right" class="h-4 w-4" />
+        <button
+            type="submit"
+            wire:loading.attr="disabled"
+            wire:target="authenticate"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#47eb7e] px-4 py-3 font-bold text-[#112116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+            <span wire:loading.remove wire:target="authenticate">Login to Dashboard</span>
+            <span wire:loading wire:target="authenticate">Signing in...</span>
+            <x-filament::icon wire:loading.remove wire:target="authenticate" icon="heroicon-m-arrow-right" class="h-4 w-4" />
+            <svg wire:loading wire:target="authenticate" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path>
+            </svg>
         </button>
     </form>
 </x-filament.user.auth-shell>

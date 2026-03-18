@@ -17,14 +17,35 @@
         </div>
 
         <div class="grid gap-3 sm:grid-cols-2">
-            <button type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#47eb7e] px-4 py-3 font-bold text-[#112116] transition hover:brightness-95">
-                <span>Verifikasi</span>
-                <x-filament::icon icon="heroicon-m-check" class="h-4 w-4" />
+            <button
+                type="submit"
+                wire:loading.attr="disabled"
+                wire:target="verify"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#47eb7e] px-4 py-3 font-bold text-[#112116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+                <span wire:loading.remove wire:target="verify">Verifikasi</span>
+                <span wire:loading wire:target="verify">Memverifikasi...</span>
+                <x-filament::icon wire:loading.remove wire:target="verify" icon="heroicon-m-check" class="h-4 w-4" />
+                <svg wire:loading wire:target="verify" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path>
+                </svg>
             </button>
 
-            <button type="button" wire:click="resend" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10">
-                <span>Kirim ulang OTP</span>
-                <x-filament::icon icon="heroicon-m-arrow-path" class="h-4 w-4" />
+            <button
+                type="button"
+                wire:click="resend"
+                wire:loading.attr="disabled"
+                wire:target="resend"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
+            >
+                <span wire:loading.remove wire:target="resend">Kirim ulang OTP</span>
+                <span wire:loading wire:target="resend">Mengirim ulang...</span>
+                <x-filament::icon wire:loading.remove wire:target="resend" icon="heroicon-m-arrow-path" class="h-4 w-4" />
+                <svg wire:loading wire:target="resend" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"></path>
+                </svg>
             </button>
         </div>
     </form>
