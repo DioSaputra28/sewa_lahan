@@ -59,6 +59,14 @@ it('renders the otp verification page for an unverified user token', function ()
         ->assertSee($user->email);
 });
 
+it('shows the resend cooldown indicator on the otp verification page', function () {
+    $user = seedPendingOtpUser();
+    useUserPanel();
+
+    Livewire::test(VerifyOtp::class, ['token' => Crypt::encryptString((string) $user->id)])
+        ->assertSee('Kirim ulang dalam 01:00');
+});
+
 it('activates the account when the submitted otp is valid', function () {
     $user = seedPendingOtpUser();
     $otp = OtpVerification::query()->where('user_id', $user->id)->latest('id')->firstOrFail();
@@ -124,6 +132,19 @@ it('blocks resend before sixty seconds and allows it after cooldown', function (
         ->assertHasNoErrors();
 
     Notification::assertSentTo($user, SendRegistrationOtp::class, 1);
+});
+
+it('resets the resend cooldown indicator after a successful resend', function () {
+    $user = seedPendingOtpUser();
+    Notification::fake();
+    useUserPanel();
+
+    $this->travel(61)->seconds();
+
+    Livewire::test(VerifyOtp::class, ['token' => Crypt::encryptString((string) $user->id)])
+        ->call('resend')
+        ->assertHasNoErrors()
+        ->assertSee('Kirim ulang dalam 01:00');
 });
 
 it('rejects login for inactive and unverified users', function () {

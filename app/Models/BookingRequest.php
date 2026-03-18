@@ -74,6 +74,11 @@ class BookingRequest extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    public function latestInvoiceRecord(): ?Invoice
+    {
+        return $this->invoices()->latest('id')->first();
+    }
+
     public function lease(): HasOne
     {
         return $this->hasOne(Lease::class);

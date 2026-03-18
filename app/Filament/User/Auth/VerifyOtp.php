@@ -25,11 +25,13 @@ class VerifyOtp extends SimplePage
 
     public string $otp_code = '';
 
+    public int $resendAvailableAt = 0;
+
     public function mount(string $token): void
     {
         $this->token = $token;
 
-        $this->resolvePendingUser();
+        $this->syncResendCooldown();
     }
 
     public function verify(): mixed
@@ -53,6 +55,7 @@ class VerifyOtp extends SimplePage
         app(RegistrationOtpService::class)->resend($this->resolvePendingUser());
 
         $this->reset('otp_code');
+        $this->syncResendCooldown();
 
         Notification::make()
             ->success()
@@ -76,6 +79,25 @@ class VerifyOtp extends SimplePage
         return $this->resolvePendingUser();
     }
 
+    public function resendCooldownRemainingSeconds(): int
+    {
+        return max($this->resendAvailableAt - now()->timestamp, 0);
+    }
+
+    public function hasResendCooldown(): bool
+    {
+        return $this->resendCooldownRemainingSeconds() > 0;
+    }
+
+    public function formattedResendCooldown(): string
+    {
+        $remainingSeconds = $this->resendCooldownRemainingSeconds();
+        $minutes = str_pad((string) intdiv($remainingSeconds, 60), 2, '0', STR_PAD_LEFT);
+        $seconds = str_pad((string) ($remainingSeconds % 60), 2, '0', STR_PAD_LEFT);
+
+        return "{$minutes}:{$seconds}";
+    }
+
     protected function resolvePendingUser(): User
     {
         try {
@@ -93,5 +115,22 @@ class VerifyOtp extends SimplePage
         }
 
         return $user;
+    }
+
+    protected function syncResendCooldown(): void
+    {
+        $user = $this->resolvePendingUser();
+        $otp = app(RegistrationOtpService::class)->latestPendingOtp($user);
+
+        if (! $otp?->created_at) {
+            $this->resendAvailableAt = 0;
+
+            return;
+        }
+
+        $this->resendAvailableAt = $otp->created_at
+            ->copy()
+            ->addSeconds(RegistrationOtpService::RESEND_COOLDOWN_SECONDS)
+            ->timestamp;
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Actions\Payments;
 
+use App\Actions\ActivityLogs\WriteOperationalActivityLog;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentAttempt;
 use App\Services\PakasirService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -13,17 +15,30 @@ class CreatePakasirPaymentAttempt
 {
     public function __construct(
         protected PakasirService $pakasirService,
+        protected WriteOperationalActivityLog $activityLog,
     ) {}
 
     public function handle(Invoice $invoice): Payment
     {
-        if ($invoice->status === 'paid') {
-            throw new RuntimeException('Invoice yang sudah dibayar tidak bisa dibuatkan link pembayaran baru.');
-        }
+        return DB::transaction(function () use ($invoice): Payment {
+            $invoice = Invoice::query()
+                ->whereKey($invoice->id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $checkoutUrl = $this->pakasirService->paymentUrl($invoice);
+            if (! $invoice->canCreatePaymentAttempt()) {
+                throw new RuntimeException('Invoice yang sudah dibayar atau kedaluwarsa tidak bisa dibuatkan link pembayaran baru.');
+            }
 
-        return DB::transaction(function () use ($checkoutUrl, $invoice): Payment {
+            $checkoutUrl = $this->pakasirService->paymentUrl($invoice);
+            $beforeInvoice = $this->activityLog->snapshot($invoice, [
+                'id',
+                'invoice_number',
+                'status',
+                'due_date',
+                'total_amount',
+            ]);
+
             $payment = Payment::query()->updateOrCreate(
                 [
                     'provider_order_id' => $invoice->invoice_number,
@@ -49,7 +64,7 @@ class CreatePakasirPaymentAttempt
                 ],
             );
 
-            PaymentAttempt::query()->updateOrCreate(
+            $paymentAttempt = PaymentAttempt::query()->updateOrCreate(
                 [
                     'invoice_id' => $invoice->id,
                     'provider_order_id' => $invoice->invoice_number,
@@ -79,6 +94,43 @@ class CreatePakasirPaymentAttempt
             if ($invoice->status === 'unpaid') {
                 $invoice->update(['status' => 'pending']);
             }
+
+            $this->activityLog->handle(
+                Auth::id(),
+                $invoice->fresh(),
+                'create-payment-link',
+                'Payment link created from invoice.',
+                [
+                    'invoice' => [
+                        'before' => $beforeInvoice,
+                        'after' => $this->activityLog->snapshot($invoice->fresh(), [
+                            'id',
+                            'invoice_number',
+                            'status',
+                            'due_date',
+                            'total_amount',
+                        ]),
+                    ],
+                    'payment' => $this->activityLog->snapshot($payment, [
+                        'id',
+                        'invoice_id',
+                        'provider',
+                        'provider_order_id',
+                        'provider_status',
+                        'amount',
+                        'status',
+                    ]),
+                    'payment_attempt' => $this->activityLog->snapshot($paymentAttempt, [
+                        'id',
+                        'invoice_id',
+                        'provider_order_id',
+                        'payment_method',
+                        'request_amount',
+                        'checkout_url',
+                        'status',
+                    ]),
+                ],
+            );
 
             return $payment->refresh();
         });

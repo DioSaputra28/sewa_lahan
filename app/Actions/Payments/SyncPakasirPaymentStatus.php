@@ -2,6 +2,7 @@
 
 namespace App\Actions\Payments;
 
+use App\Actions\ActivityLogs\WriteOperationalActivityLog;
 use App\Actions\Leases\CreateLeaseFromPaidBooking;
 use App\Models\BookingRequest;
 use App\Models\Payment;
@@ -16,15 +17,30 @@ class SyncPakasirPaymentStatus
     public function __construct(
         protected PakasirService $pakasirService,
         protected CreateLeaseFromPaidBooking $createLeaseFromPaidBooking,
+        protected WriteOperationalActivityLog $activityLog,
     ) {}
 
     public function handle(Payment $payment): Payment
     {
-        $invoice = $payment->invoice()->with(['bookingRequest'])->firstOrFail();
-        $detail = $this->pakasirService->getTransactionDetail($invoice);
-        $transaction = $detail['transaction'] ?? [];
+        $detail = $this->pakasirService->getTransactionDetail($payment->invoice()->firstOrFail());
 
-        return DB::transaction(function () use ($detail, $invoice, $payment, $transaction): Payment {
+        return DB::transaction(function () use ($detail, $payment): Payment {
+            $payment = Payment::query()
+                ->whereKey($payment->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $invoice = $payment->invoice()
+                ->with(['paymentAttempts'])
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $bookingRequest = $invoice->bookingRequest()
+                ->lockForUpdate()
+                ->first();
+            $transaction = $detail['transaction'] ?? [];
+            $businessExpired = $this->isBusinessExpired($invoice, $bookingRequest);
+
             $providerStatus = (string) ($transaction['status'] ?? 'pending');
             $paymentMethod = $transaction['payment_method'] ?? $payment->provider_payment_method;
             $paymentNumber = $transaction['payment_number'] ?? $payment->provider_payment_number;
@@ -32,7 +48,7 @@ class SyncPakasirPaymentStatus
             $totalPayment = isset($transaction['total_payment']) ? (int) $transaction['total_payment'] : $payment->provider_total_payment;
             $expiredAt = isset($transaction['expired_at']) ? Carbon::parse($transaction['expired_at']) : $payment->provider_expired_at;
             $completedAt = isset($transaction['completed_at']) ? Carbon::parse($transaction['completed_at']) : null;
-            $localStatus = $this->mapPaymentStatus($providerStatus);
+            $localStatus = $businessExpired ? 'expired' : $this->mapPaymentStatus($providerStatus);
 
             $payment->update([
                 'provider_status' => $providerStatus,
@@ -82,8 +98,6 @@ class SyncPakasirPaymentStatus
                 'paid_at' => $localStatus === 'paid' ? ($completedAt ?? now()) : null,
             ]);
 
-            $bookingRequest = $invoice->bookingRequest;
-
             if ($bookingRequest instanceof BookingRequest) {
                 $bookingRequest->update([
                     'payment_status' => $localStatus,
@@ -92,11 +106,132 @@ class SyncPakasirPaymentStatus
 
                 if ($localStatus === 'paid') {
                     $this->createLeaseFromPaidBooking->handle($bookingRequest, $invoice);
+                } elseif ($businessExpired && $providerStatus === 'completed') {
+                    $this->activityLog->handle(
+                        null,
+                        $payment,
+                        'late-payment-anomaly',
+                        'Completed payment arrived after the booking had already expired locally.',
+                        [
+                            'payment' => $this->activityLog->snapshot($payment->fresh(), [
+                                'id',
+                                'invoice_id',
+                                'provider',
+                                'provider_order_id',
+                                'provider_status',
+                                'provider_payment_method',
+                                'provider_payment_number',
+                                'provider_fee',
+                                'provider_total_payment',
+                                'provider_expired_at',
+                                'provider_completed_at',
+                                'amount',
+                                'status',
+                                'paid_at',
+                            ]),
+                            'booking_request' => $this->activityLog->snapshot($bookingRequest->fresh(), [
+                                'id',
+                                'status',
+                                'payment_status',
+                                'payment_due_at',
+                                'final_price',
+                            ]),
+                            'invoice' => $this->activityLog->snapshot($invoice->fresh(), [
+                                'id',
+                                'invoice_number',
+                                'status',
+                                'due_date',
+                                'total_amount',
+                            ]),
+                        ],
+                    );
                 }
+            } elseif ($businessExpired && $providerStatus === 'completed') {
+                $this->activityLog->handle(
+                    null,
+                    $payment,
+                    'late-payment-anomaly',
+                    'Completed payment arrived after the booking had already expired locally.',
+                    [
+                        'payment' => $this->activityLog->snapshot($payment->fresh(), [
+                            'id',
+                            'invoice_id',
+                            'provider',
+                            'provider_order_id',
+                            'provider_status',
+                            'provider_payment_method',
+                            'provider_payment_number',
+                            'provider_fee',
+                            'provider_total_payment',
+                            'provider_expired_at',
+                            'provider_completed_at',
+                            'amount',
+                            'status',
+                            'paid_at',
+                        ]),
+                        'invoice' => $this->activityLog->snapshot($invoice->fresh(), [
+                            'id',
+                            'invoice_number',
+                            'status',
+                            'due_date',
+                            'total_amount',
+                        ]),
+                    ],
+                );
             }
+
+            $this->activityLog->handle(
+                null,
+                $payment,
+                'payment-status-synced',
+                'Payment status synchronized from Pakasir transaction detail.',
+                [
+                    'payment' => $this->activityLog->snapshot($payment->fresh(), [
+                        'id',
+                        'invoice_id',
+                        'provider',
+                        'provider_order_id',
+                        'provider_status',
+                        'provider_payment_method',
+                        'provider_payment_number',
+                        'provider_fee',
+                        'provider_total_payment',
+                        'provider_expired_at',
+                        'provider_completed_at',
+                        'amount',
+                        'status',
+                        'paid_at',
+                    ]),
+                    'booking_request' => $bookingRequest instanceof BookingRequest
+                        ? $this->activityLog->snapshot($bookingRequest->fresh(), [
+                            'id',
+                            'status',
+                            'payment_status',
+                            'payment_due_at',
+                            'final_price',
+                        ])
+                        : null,
+                    'invoice' => $this->activityLog->snapshot($invoice->fresh(), [
+                        'id',
+                        'invoice_number',
+                        'status',
+                        'due_date',
+                        'total_amount',
+                    ]),
+                ],
+            );
 
             return $payment->refresh();
         });
+    }
+
+    protected function isBusinessExpired(Invoice $invoice, ?BookingRequest $bookingRequest): bool
+    {
+        if ($invoice->status === 'expired') {
+            return true;
+        }
+
+        return $bookingRequest?->status === 'expired' || $bookingRequest?->payment_status === 'expired';
     }
 
     protected function mapPaymentStatus(string $providerStatus): string

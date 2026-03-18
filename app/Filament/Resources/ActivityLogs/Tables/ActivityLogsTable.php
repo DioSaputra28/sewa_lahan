@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\ActivityLogs\Tables;
 
+use App\Models\ActivityLog;
 use App\Models\User;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ActivityLogsTable
 {
@@ -17,9 +19,10 @@ class ActivityLogsTable
             ->defaultSort('created_at', 'desc')
             ->columns([
                 TextColumn::make('actor.name')
-                    ->label('Admin')
+                    ->label('Actor')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn (?string $state, ActivityLog $record): string => $record->actor?->name ?? 'System'),
                 TextColumn::make('action')
                     ->label('Action')
                     ->badge()
@@ -42,8 +45,23 @@ class ActivityLogsTable
             ])
             ->filters([
                 SelectFilter::make('actor_id')
-                    ->label('Admin')
-                    ->options(User::query()->whereHas('roles', fn ($query) => $query->where('name', 'admin'))->orderBy('name')->pluck('name', 'id')->all()),
+                    ->label('Actor')
+                    ->options([
+                        'system' => 'System',
+                    ] + User::query()
+                        ->whereHas('roles', fn ($query) => $query->where('name', 'admin'))
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all())
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? null;
+
+                        if ($value === 'system') {
+                            return $query->whereNull('actor_id');
+                        }
+
+                        return $query->when($value, fn (Builder $query, $value): Builder => $query->where('actor_id', $value));
+                    }),
                 SelectFilter::make('action')
                     ->label('Action')
                     ->options([

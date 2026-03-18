@@ -19,6 +19,13 @@ class ActivityLog extends Model
         'properties',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'properties' => 'array',
+        ];
+    }
+
     public function actor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'actor_id');

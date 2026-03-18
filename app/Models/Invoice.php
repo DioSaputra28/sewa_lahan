@@ -93,7 +93,7 @@ class Invoice extends Model
 
     public function canContinuePayment(): bool
     {
-        if ($this->status === 'paid') {
+        if (in_array($this->status, ['paid', 'expired', 'cancelled'], true)) {
             return false;
         }
 
@@ -102,7 +102,7 @@ class Invoice extends Model
 
     public function canCreatePaymentAttempt(): bool
     {
-        if ($this->status === 'paid') {
+        if (in_array($this->status, ['paid', 'expired', 'cancelled'], true)) {
             return false;
         }
 

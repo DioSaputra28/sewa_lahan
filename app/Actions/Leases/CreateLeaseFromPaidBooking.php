@@ -2,6 +2,7 @@
 
 namespace App\Actions\Leases;
 
+use App\Actions\ActivityLogs\WriteOperationalActivityLog;
 use App\Models\BookingRequest;
 use App\Models\Invoice;
 use App\Models\Lease;
@@ -11,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class CreateLeaseFromPaidBooking
 {
+    public function __construct(
+        protected WriteOperationalActivityLog $activityLog,
+    ) {}
+
     public function handle(BookingRequest $bookingRequest, ?Invoice $invoice = null): Lease
     {
         if ($bookingRequest->lease) {
@@ -64,6 +69,47 @@ class CreateLeaseFromPaidBooking
                     'status' => 'paid',
                 ]);
             }
+
+            $this->activityLog->handle(
+                null,
+                $lease,
+                'activate-lease',
+                'Lease activated after payment succeeded.',
+                [
+                    'lease' => $this->activityLog->snapshot($lease, [
+                        'id',
+                        'lease_number',
+                        'booking_request_id',
+                        'invoice_id',
+                        'plot_id',
+                        'tenant_id',
+                        'status',
+                        'term_type',
+                        'duration',
+                        'start_date',
+                        'end_date',
+                        'agreed_price',
+                    ]),
+                    'booking_request' => $this->activityLog->snapshot($bookingRequest, [
+                        'id',
+                        'status',
+                        'payment_status',
+                        'final_price',
+                        'approved_at',
+                        'payment_due_at',
+                    ]),
+                    'invoice' => $invoice
+                        ? $this->activityLog->snapshot($invoice, [
+                            'id',
+                            'invoice_number',
+                            'status',
+                            'due_date',
+                            'total_amount',
+                        ])
+                        : null,
+                    'period_count' => $lease->periods()->count(),
+                ],
+            );
 
             return $lease->refresh();
         });

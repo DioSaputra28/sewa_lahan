@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Invoices\Pages;
 
+use App\Actions\ActivityLogs\WriteOperationalActivityLog;
 use App\Actions\Payments\CreatePakasirPaymentAttempt;
 use App\Filament\Resources\Invoices\InvoiceResource;
 use App\Models\Invoice;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -58,10 +60,44 @@ class EditInvoice extends EditRecord
 
     protected function handleRecordUpdate($record, array $data): Invoice
     {
-        return DB::transaction(function () use ($data, $record): Invoice {
+        $activityLog = app(WriteOperationalActivityLog::class);
+        $before = $activityLog->snapshot($record, [
+            'id',
+            'due_date',
+            'subtotal',
+            'discount_amount',
+            'penalty_amount',
+            'total_amount',
+            'status',
+        ]);
+
+        return DB::transaction(function () use ($activityLog, $before, $data, $record): Invoice {
             $record->update($data);
 
-            return $record->refresh();
+            $invoice = $record->refresh();
+
+            $activityLog->handle(
+                Auth::id(),
+                $invoice,
+                'update-invoice',
+                'Invoice updated from admin panel.',
+                [
+                    'invoice' => [
+                        'before' => $before,
+                        'after' => $activityLog->snapshot($invoice, [
+                            'id',
+                            'due_date',
+                            'subtotal',
+                            'discount_amount',
+                            'penalty_amount',
+                            'total_amount',
+                            'status',
+                        ]),
+                    ],
+                ],
+            );
+
+            return $invoice;
         });
     }
 

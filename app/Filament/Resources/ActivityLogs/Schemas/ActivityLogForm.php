@@ -19,8 +19,8 @@ class ActivityLogForm
                     ->description('Bagian ini menampilkan ringkasan aksi penting yang dilakukan admin pada sistem.')
                     ->schema([
                         Placeholder::make('actor_name')
-                            ->label('Admin')
-                            ->content(fn (?ActivityLog $record): string => $record?->actor?->name ?? '-'),
+                            ->label('Actor')
+                            ->content(fn (?ActivityLog $record): string => $record?->actor?->name ?? 'System'),
                         Placeholder::make('action')
                             ->label('Action')
                             ->content(fn (?ActivityLog $record): string => $record?->action ?? '-'),
@@ -54,6 +54,7 @@ class ActivityLogForm
                             ->label('Properties')
                             ->disabled()
                             ->dehydrated(false)
+                            ->formatStateUsing(fn (?array $state): string => filled($state) ? json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) : '-')
                             ->rows(8),
                     ]),
             ]);

@@ -50,7 +50,11 @@ class ActivityLogResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereHas('actor.roles', fn (Builder $query): Builder => $query->where('name', 'admin'));
+            ->with('actor')
+            ->where(function (Builder $query): void {
+                $query->whereNull('actor_id')
+                    ->orWhereHas('actor.roles', fn (Builder $query): Builder => $query->where('name', 'admin'));
+            });
     }
 
     public static function getPages(): array

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BookingRequests\Pages;
 
+use App\Actions\ActivityLogs\WriteOperationalActivityLog;
 use App\Filament\Resources\BookingRequests\BookingRequestResource;
 use App\Models\BookingRequest;
 use App\Models\BookingStatusEvent;
@@ -94,6 +95,16 @@ class EditBookingRequest extends EditRecord
             return null;
         }
 
+        $beforeBooking = app(WriteOperationalActivityLog::class)->snapshot($record, [
+            'id',
+            'status',
+            'payment_status',
+            'approved_by',
+            'approved_at',
+            'payment_due_at',
+            'final_price',
+        ]);
+
         DB::transaction(function () use ($adminId, $data, $record): void {
             $record->update([
                 'final_price' => $data['final_price'],
@@ -136,6 +147,36 @@ class EditBookingRequest extends EditRecord
                 'unit_price' => (int) $record->final_price,
                 'total' => (int) $record->final_price,
             ]);
+
+            app(WriteOperationalActivityLog::class)->handle(
+                $adminId,
+                $record->fresh(),
+                'approve-booking',
+                'Booking approved and invoice created.',
+                [
+                    'booking_request' => [
+                        'before' => $beforeBooking,
+                        'after' => app(WriteOperationalActivityLog::class)->snapshot($record->fresh(), [
+                            'id',
+                            'status',
+                            'payment_status',
+                            'approved_by',
+                            'approved_at',
+                            'payment_due_at',
+                            'final_price',
+                        ]),
+                    ],
+                    'invoice' => [
+                        'after' => app(WriteOperationalActivityLog::class)->snapshot($invoice, [
+                            'id',
+                            'invoice_number',
+                            'status',
+                            'due_date',
+                            'total_amount',
+                        ]),
+                    ],
+                ],
+            );
         });
 
         Notification::make()
@@ -165,6 +206,14 @@ class EditBookingRequest extends EditRecord
             return null;
         }
 
+        $beforeBooking = app(WriteOperationalActivityLog::class)->snapshot($record, [
+            'id',
+            'status',
+            'payment_status',
+            'rejected_at',
+            'rejection_reason',
+        ]);
+
         DB::transaction(function () use ($adminId, $data, $formData, $record): void {
             $record->update([
                 'notes' => $formData['notes'] ?? null,
@@ -179,6 +228,25 @@ class EditBookingRequest extends EditRecord
                 'changed_by' => $adminId,
                 'notes' => $data['rejection_reason'],
             ]);
+
+            app(WriteOperationalActivityLog::class)->handle(
+                $adminId,
+                $record->fresh(),
+                'reject-booking',
+                'Booking rejected by admin.',
+                [
+                    'booking_request' => [
+                        'before' => $beforeBooking,
+                        'after' => app(WriteOperationalActivityLog::class)->snapshot($record->fresh(), [
+                            'id',
+                            'status',
+                            'payment_status',
+                            'rejected_at',
+                            'rejection_reason',
+                        ]),
+                    ],
+                ],
+            );
         });
 
         Notification::make()
