@@ -10,7 +10,8 @@ RUN composer install \
     --no-interaction \
     --no-progress \
     --optimize-autoloader \
-    --no-scripts
+    --no-scripts \
+    --ignore-platform-req=ext-intl
 
 
 FROM node:22-bookworm-slim AS frontend
@@ -20,6 +21,10 @@ WORKDIR /app
 COPY package.json package-lock.json vite.config.js ./
 COPY resources ./resources
 COPY public ./public
+COPY app ./app
+COPY bootstrap ./bootstrap
+COPY config ./config
+COPY routes ./routes
 
 RUN npm ci
 RUN npm run build
