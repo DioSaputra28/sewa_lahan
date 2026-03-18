@@ -1,0 +1,17 @@
+.git
+.github
+.claude
+.agents
+node_modules
+vendor
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php
+tests
+docs
+docker-compose.yml
+docker-compose.yaml
+README.md
+*.md
