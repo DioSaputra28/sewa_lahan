@@ -25,6 +25,7 @@ COPY app ./app
 COPY bootstrap ./bootstrap
 COPY config ./config
 COPY routes ./routes
+COPY --from=vendor /app/vendor ./vendor
 
 RUN npm ci
 RUN npm run build
