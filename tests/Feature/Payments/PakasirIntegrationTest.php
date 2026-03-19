@@ -170,6 +170,66 @@ it('handles pakasir webhook and updates local payment state', function () {
     ]);
 });
 
+it('accepts pakasir webhook requests without csrf token', function () {
+    $context = seedPaymentContext();
+
+    $payment = Payment::query()->create([
+        'invoice_id' => $context['invoice']->id,
+        'user_id' => $context['customer']->id,
+        'provider' => 'pakasir',
+        'provider_project_slug' => 'demo-project',
+        'provider_order_id' => $context['invoice']->invoice_number,
+        'provider_status' => 'pending',
+        'provider_payment_method' => null,
+        'amount' => $context['invoice']->total_amount,
+        'status' => 'pending',
+    ]);
+
+    PaymentAttempt::query()->create([
+        'invoice_id' => $context['invoice']->id,
+        'user_id' => $context['customer']->id,
+        'provider' => 'pakasir',
+        'provider_project_slug' => 'demo-project',
+        'provider_order_id' => $context['invoice']->invoice_number,
+        'payment_method' => null,
+        'request_amount' => $context['invoice']->total_amount,
+        'checkout_url' => 'https://app.pakasir.com/pay/demo-project/'.$context['invoice']->total_amount.'?order_id='.$context['invoice']->invoice_number,
+        'status' => 'pending',
+        'requested_at' => now(),
+    ]);
+
+    Http::fake([
+        'app.pakasir.com/api/transactiondetail*' => Http::response([
+            'transaction' => [
+                'amount' => $context['invoice']->total_amount,
+                'order_id' => $context['invoice']->invoice_number,
+                'project' => 'demo-project',
+                'status' => 'completed',
+                'payment_method' => 'qris',
+                'payment_number' => 'QRIS-DEMO-003',
+                'completed_at' => now()->toIso8601String(),
+            ],
+        ]),
+    ]);
+
+    $this->withMiddleware()
+        ->postJson('/webhooks/pakasir', [
+            'amount' => $context['invoice']->total_amount,
+            'order_id' => $context['invoice']->invoice_number,
+            'project' => 'demo-project',
+            'status' => 'completed',
+            'payment_method' => 'qris',
+            'completed_at' => now()->toIso8601String(),
+        ])
+        ->assertSuccessful();
+
+    assertDatabaseHas('payment_events', [
+        'payment_id' => $payment->id,
+        'event_source' => 'webhook',
+        'provider_order_id' => $context['invoice']->invoice_number,
+    ]);
+});
+
 function seedPaymentContext(array $bookingOverrides = []): array
 {
     config()->set('services.pakasir.project_slug', 'demo-project');

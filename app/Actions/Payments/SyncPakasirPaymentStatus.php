@@ -5,6 +5,7 @@ namespace App\Actions\Payments;
 use App\Actions\ActivityLogs\WriteOperationalActivityLog;
 use App\Actions\Leases\CreateLeaseFromPaidBooking;
 use App\Models\BookingRequest;
+use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentAttempt;
 use App\Models\PaymentEvent;
