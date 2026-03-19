@@ -105,7 +105,7 @@ class EditBookingRequest extends EditRecord
             'final_price',
         ]);
 
-        DB::transaction(function () use ($adminId, $data, $record): void {
+        DB::transaction(function () use ($adminId, $data, $record, $beforeBooking): void {
             $record->update([
                 'final_price' => $data['final_price'],
                 'payment_due_at' => $data['payment_due_at'],
@@ -214,7 +214,7 @@ class EditBookingRequest extends EditRecord
             'rejection_reason',
         ]);
 
-        DB::transaction(function () use ($adminId, $data, $formData, $record): void {
+        DB::transaction(function () use ($adminId, $data, $formData, $record, $beforeBooking): void {
             $record->update([
                 'notes' => $formData['notes'] ?? null,
                 'status' => 'rejected',
