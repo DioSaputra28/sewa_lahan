@@ -37,6 +37,7 @@ WORKDIR /var/www/html
 
 ENV APP_ENV=production
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
+ENV TRUST_PROXIES=*
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
