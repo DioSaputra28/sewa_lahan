@@ -9,6 +9,11 @@ class ListInvoices extends ListRecords
 {
     protected static string $resource = InvoiceResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Invoice Saya';
+    }
+
     protected function getHeaderActions(): array
     {
         return [];

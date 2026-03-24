@@ -17,9 +17,7 @@
             <div class="space-y-4">
                 @php
                     $primaryImage = $plot->images->firstWhere('is_primary', true) ?? $plot->images->first();
-                    $primaryImageUrl = $primaryImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($primaryImage->image_path)
-                        ? \Illuminate\Support\Facades\Storage::disk('public')->url($primaryImage->image_path)
-                        : null;
+                    $primaryImageUrl = $primaryImage?->url;
                 @endphp
 
                 <div class="overflow-hidden rounded-[1.9rem] border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-gray-900 dark:shadow-none">
@@ -45,9 +43,7 @@
                     <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
                         @foreach ($plot->images as $image)
                             @php
-                                $thumbnailUrl = \Illuminate\Support\Facades\Storage::disk('public')->exists($image->image_path)
-                                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($image->image_path)
-                                    : null;
+                                $thumbnailUrl = $image->url;
                             @endphp
 
                             <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-gray-900 dark:shadow-none">

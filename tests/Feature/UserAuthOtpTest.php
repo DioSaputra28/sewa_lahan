@@ -18,12 +18,12 @@ it('renders the custom user login and register pages', function () {
     get('/user/login')
         ->assertSuccessful()
         ->assertSee('PasarSpace')
-        ->assertSee('Welcome back');
+        ->assertSee('Masuk ke akunmu');
 
     get('/user/register')
         ->assertSuccessful()
         ->assertSee('PasarSpace')
-        ->assertSee('Create your account');
+        ->assertSee('Buat akun customer');
 });
 
 it('registers a customer user in inactive state and sends otp email', function () {

@@ -5,7 +5,7 @@
 @source '../../../../resources/views/components/filament/user/**/*';
 
 @theme {
-    --color-user-accent: oklch(0.78 0.14 78);
+    --color-user-accent: oklch(0.78 0.16 145);
     --color-user-ink: oklch(0.28 0.03 240);
     --color-primary: #47eb7e;
     --color-background-light: #f6f8f6;

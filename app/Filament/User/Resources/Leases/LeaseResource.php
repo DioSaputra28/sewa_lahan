@@ -24,11 +24,11 @@ class LeaseResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'lease_number';
 
-    protected static ?string $navigationLabel = 'Leases';
+    protected static ?string $navigationLabel = 'Kontrak Saya';
 
-    protected static ?string $modelLabel = 'lease';
+    protected static ?string $modelLabel = 'kontrak';
 
-    protected static ?string $pluralModelLabel = 'leases';
+    protected static ?string $pluralModelLabel = 'kontrak';
 
     public static function form(Schema $schema): Schema
     {

@@ -20,4 +20,9 @@ class ViewPlot extends Page
 
         $this->plot = $plot->load(['market', 'area', 'images']);
     }
+
+    public function getTitle(): string
+    {
+        return 'Detail Lahan';
+    }
 }

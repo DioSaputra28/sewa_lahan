@@ -1,19 +1,19 @@
 <x-filament.user.auth-shell
-    heading="Welcome back"
-    subheading="Please enter your details to access your dashboard."
-    footer-text="Don't have an account?"
-    footer-link-label="Sign up for free"
+    heading="Masuk ke akunmu"
+    subheading="Gunakan email dan password untuk mengakses panel customer."
+    footer-text="Belum punya akun?"
+    footer-link-label="Daftar sekarang"
     :footer-link-url="filament()->getRegistrationUrl()"
-    :show-social="true"
+    :show-social="false"
 >
     <form wire:submit="authenticate" class="space-y-6">
         <div class="space-y-2">
-            <label class="text-sm font-semibold text-slate-700 dark:text-slate-300" for="email">Email Address</label>
+            <label class="text-sm font-semibold text-slate-700 dark:text-slate-300" for="email">Alamat email</label>
             <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                     <x-filament::icon icon="heroicon-o-envelope" class="h-5 w-5" />
                 </div>
-                <input id="email" wire:model.defer="data.email" type="email" placeholder="name@company.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-hidden transition-all focus:border-transparent focus:ring-2 focus:ring-[#47eb7e] dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-100">
+                <input id="email" wire:model.defer="data.email" type="email" placeholder="nama@email.com" class="w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 outline-hidden transition-all focus:border-transparent focus:ring-2 focus:ring-[#47eb7e] dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-100">
             </div>
             @error('data.email') <p class="text-sm text-rose-500">{{ $message }}</p> @enderror
         </div>
@@ -21,7 +21,7 @@
         <div class="space-y-2">
             <div class="flex items-center justify-between">
                 <label class="text-sm font-semibold text-slate-700 dark:text-slate-300" for="password">Password</label>
-                <span class="text-sm font-medium text-primary">Forgot password?</span>
+                <span class="text-sm font-medium text-primary">Lupa password?</span>
             </div>
             <div class="relative">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
@@ -37,7 +37,7 @@
 
         <label class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
                 <input wire:model.defer="data.remember" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-[#47eb7e] focus:ring-[#47eb7e] dark:border-slate-600 dark:bg-slate-800">
-                Remember for 30 days
+                Ingat saya selama 30 hari
             </label>
 
         <button
@@ -46,8 +46,8 @@
             wire:target="authenticate"
             class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#47eb7e] px-4 py-3 font-bold text-[#112116] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
         >
-            <span wire:loading.remove wire:target="authenticate">Login to Dashboard</span>
-            <span wire:loading wire:target="authenticate">Signing in...</span>
+            <span wire:loading.remove wire:target="authenticate">Masuk</span>
+            <span wire:loading wire:target="authenticate">Sedang masuk...</span>
             <x-filament::icon wire:loading.remove wire:target="authenticate" icon="heroicon-m-arrow-right" class="h-4 w-4" />
             <svg wire:loading wire:target="authenticate" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

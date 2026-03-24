@@ -116,7 +116,7 @@ class LeaseForm
                     ->schema([
                         Repeater::make('periods')
                             ->relationship('periods')
-                            ->label('Lease periods')
+                            ->label('Periode kontrak')
                             ->addable(false)
                             ->deletable(false)
                             ->reorderable(false)

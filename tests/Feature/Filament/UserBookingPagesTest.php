@@ -41,6 +41,19 @@ it('shows available term types on the booking create page based on plot prices',
     $response->assertSee('Tahunan');
 });
 
+it('uses custom action labels on the booking create page', function () {
+    $context = seedUserBookingContext();
+
+    actingAs($context['customer']);
+
+    $response = get('/user/bookings/create?plot='.$context['plot']->id);
+
+    $response->assertSuccessful();
+    $response->assertSee('Ajukan Booking');
+    $response->assertSee('Kembali');
+    $response->assertDontSee('Create another');
+});
+
 it('shows only current user bookings in the user panel', function () {
     $context = seedUserBookingContext();
 

@@ -80,7 +80,7 @@ class Lease extends Model
         return BookingRequest::query()
             ->where('user_id', $this->tenant_id)
             ->where('plot_id', $this->plot_id)
-            ->where('notes', 'like', '%'.BookingRequest::renewalMarkerForLease($this).'%')
+            ->where('renewal_of_lease_id', $this->id)
             ->whereIn('status', ['pending', 'approved'])
             ->where('payment_status', '!=', 'paid')
             ->exists();

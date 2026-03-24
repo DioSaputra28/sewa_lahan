@@ -17,6 +17,7 @@ class BookingRequest extends Model
     protected $fillable = [
         'user_id',
         'plot_id',
+        'renewal_of_lease_id',
         'term_type',
         'duration',
         'start_date',
@@ -59,6 +60,11 @@ class BookingRequest extends Model
         return $this->belongsTo(Plot::class);
     }
 
+    public function renewalOfLease(): BelongsTo
+    {
+        return $this->belongsTo(Lease::class, 'renewal_of_lease_id');
+    }
+
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
@@ -91,6 +97,10 @@ class BookingRequest extends Model
 
     public function renewalSourceLeaseId(): ?int
     {
+        if (filled($this->renewal_of_lease_id)) {
+            return (int) $this->renewal_of_lease_id;
+        }
+
         if (! filled($this->notes)) {
             return null;
         }

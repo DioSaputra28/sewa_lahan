@@ -24,11 +24,11 @@ class InvoiceResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
 
-    protected static ?string $navigationLabel = 'Invoices';
+    protected static ?string $navigationLabel = 'Invoice Saya';
 
     protected static ?string $modelLabel = 'invoice';
 
-    protected static ?string $pluralModelLabel = 'invoices';
+    protected static ?string $pluralModelLabel = 'invoice';
 
     public static function form(Schema $schema): Schema
     {

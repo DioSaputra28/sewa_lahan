@@ -13,6 +13,11 @@ class ViewInvoice extends ViewRecord
 {
     protected static string $resource = InvoiceResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Detail Invoice';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

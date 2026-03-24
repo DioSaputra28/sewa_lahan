@@ -21,20 +21,20 @@
             <div class="flex flex-col lg:flex-row items-center gap-12">
                 <div class="flex-1 text-left lg:pr-8">
                     <div class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold leading-6 text-primary ring-1 ring-inset ring-primary/20 mb-6">
-                        <span>Now available in 12 major cities</span>
+                        <span>{{ __('web.landing.hero_badge') }}</span>
                     </div>
                     <h1 class="text-5xl lg:text-7xl font-black text-slate-900 dark:text-slate-50 leading-[1.1] tracking-tight mb-6">
-                        Secure Your <span class="text-primary">Prime Market</span> Stall Today
+                        {{ __('web.landing.hero_title') }}
                     </h1>
                     <p class="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-xl">
-                        Empower your business with high-traffic locations in the heart of local communities. Affordable, flexible, and ready-to-use market spaces.
+                        {{ __('web.landing.hero_subtitle') }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="{{ route('lahan.index') }}" class="bg-primary hover:bg-primary/90 text-slate-900 px-8 py-4 rounded-xl text-lg font-bold shadow-lg transition-transform active:scale-95 text-center">
-                            Browse Stalls
+                            {{ __('web.landing.browse_stalls') }}
                         </a>
                         <button class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-8 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                            View Map
+                            {{ __('web.landing.view_map') }}
                         </button>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                 <!-- Region -->
                 <div class="flex-1 min-w-[200px]">
                     <select name="region" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 hover:border-primary transition-colors group text-sm font-medium cursor-pointer appearance-none">
-                        <option value="">All Regions</option>
+                        <option value="">{{ __('web.landing.filter_all_regions') }}</option>
                         @foreach ($regions as $region)
                             <option value="{{ $region }}">{{ $region }}</option>
                         @endforeach
@@ -75,7 +75,7 @@
                 <!-- Size -->
                 <div class="flex-1 min-w-[200px]">
                     <select name="size" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 hover:border-primary transition-colors group text-sm font-medium cursor-pointer appearance-none">
-                        <option value="">Stall Size</option>
+                        <option value="">{{ __('web.landing.filter_stall_size') }}</option>
                         <option value="small">&lt; 4 m²</option>
                         <option value="medium">4–9 m²</option>
                         <option value="large">&gt; 9 m²</option>
@@ -84,7 +84,7 @@
                 <!-- Price -->
                 <div class="flex-1 min-w-[200px]">
                     <select name="price" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 hover:border-primary transition-colors group text-sm font-medium cursor-pointer appearance-none">
-                        <option value="">Price Range</option>
+                        <option value="">{{ __('web.landing.filter_price_range') }}</option>
                         <option value="under_1m">&lt; Rp 1 juta/mo</option>
                         <option value="1m_to_2m">Rp 1–2 juta/mo</option>
                         <option value="over_2m">&gt; Rp 2 juta/mo</option>
@@ -92,7 +92,7 @@
                 </div>
                 <button type="submit" class="bg-slate-900 dark:bg-primary dark:text-slate-900 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
                     <span class="material-symbols-outlined text-xl">tune</span>
-                    Apply Filters
+                    {{ __('web.landing.filter_apply') }}
                 </button>
             </div>
         </form>
@@ -103,13 +103,13 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center justify-between mb-10">
                 <div>
-                    <h2 class="text-3xl font-black tracking-tight mb-2">Available Stall Rentals</h2>
+                    <h2 class="text-3xl font-black tracking-tight mb-2">{{ __('web.landing.section_listings') }}</h2>
                     <p class="text-slate-500">
-                        Showing {{ $previewPlots->count() }} high-potential location{{ $previewPlots->count() !== 1 ? 's' : '' }} available for rent
+                        {{ __('web.landing.showing_stalls', ['shown' => $previewPlots->count(), 'total' => $previewPlotsTotal]) }}
                     </p>
                 </div>
                 <a class="hidden sm:flex items-center gap-2 text-sm font-bold text-primary group" href="{{ route('lahan.index') }}">
-                    See All
+                    {{ __('web.landing.see_all') }}
                     <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
                 </a>
             </div>
@@ -117,8 +117,8 @@
             @if ($previewPlots->isEmpty())
                 <div class="text-center py-16">
                     <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">storefront</span>
-                    <p class="text-slate-500 text-lg">No available stalls at the moment. Check back soon!</p>
-                    <a class="mt-4 inline-flex items-center gap-2 text-primary font-bold" href="{{ route('lahan.index') }}">Browse all stalls →</a>
+                    <p class="text-slate-500 text-lg">{{ __('web.landing.empty_no_stalls') }}</p>
+                    <a class="mt-4 inline-flex items-center gap-2 text-primary font-bold" href="{{ route('lahan.index') }}">{{ __('web.landing.empty_browse_all') }} →</a>
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -133,7 +133,7 @@
                                 @endphp
                                 <img class="plot-card-img" src="{{ $cardImg }}" alt="{{ $plot->name }}" />
                                 <div class="absolute top-3 left-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-3 py-1 rounded-lg">
-                                    <span class="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest">Available</span>
+                                    <span class="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest">{{ __('web.landing.status_available') }}</span>
                                 </div>
                             </div>
                             <div class="p-6">
@@ -158,19 +158,19 @@
                                     </div>
                                     <div class="flex items-center gap-1.5">
                                         <span class="material-symbols-outlined text-slate-400 text-lg">bolt</span>
-                                        <span class="text-sm font-semibold">Ready</span>
+                                        <span class="text-sm font-semibold">{{ __('web.landing.status_ready') }}</span>
                                     </div>
                                 </div>
                                 <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-xs text-slate-500 font-bold uppercase tracking-tight">Price</p>
+                                        <p class="text-xs text-slate-500 font-bold uppercase tracking-tight">{{ __('web.landing.price_label') }}</p>
                                         <p class="text-lg font-black text-slate-900 dark:text-slate-100">
                                             {{ $imgService->formatPrice($plot->base_price_monthly) }}
-                                            <span class="text-sm font-normal text-slate-500">/mo</span>
+                                            <span class="text-sm font-normal text-slate-500">{{ __('web.landing.per_month') }}</span>
                                         </p>
                                     </div>
                                     <span class="bg-primary hover:bg-primary/90 text-slate-900 px-4 py-2.5 rounded-lg font-bold transition-all shadow-sm text-sm">
-                                        Rent Now
+                                        {{ __('web.landing.rent_now') }}
                                     </span>
                                 </div>
                             </div>
@@ -185,27 +185,27 @@
     <section class="bg-slate-900 py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 relative z-10">
             <div class="flex-1">
-                <h2 class="text-3xl lg:text-5xl font-black text-white mb-6">Explore the Market Interactive Map</h2>
-                <p class="text-slate-400 text-lg mb-8">Pinpoint the exact location of your future stall. Check foot traffic heatmaps, nearby amenities, and available neighboring vendors.</p>
+                <h2 class="text-3xl lg:text-5xl font-black text-white mb-6">{{ __('web.landing.section_map_title') }}</h2>
+                <p class="text-slate-400 text-lg mb-8">{{ __('web.landing.section_map_desc') }}</p>
                 <div class="space-y-4 mb-8">
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
                         <div>
-                            <h4 class="text-white font-bold">Real-time Availability</h4>
-                            <p class="text-slate-500 text-sm">Always see which stalls are open for rent.</p>
+                            <h4 class="text-white font-bold">{{ __('web.landing.map_feature_realtime') }}</h4>
+                            <p class="text-slate-500 text-sm">{{ __('web.landing.map_feature_realtime_desc') }}</p>
                         </div>
                     </div>
                     <div class="flex items-start gap-3">
                         <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
                         <div>
-                            <h4 class="text-white font-bold">Heatmap Analytics</h4>
-                            <p class="text-slate-500 text-sm">Understand visitor patterns before you commit.</p>
+                            <h4 class="text-white font-bold">{{ __('web.landing.map_feature_heatmap') }}</h4>
+                            <p class="text-slate-500 text-sm">{{ __('web.landing.map_feature_heatmap_desc') }}</p>
                         </div>
                     </div>
                 </div>
                 <button class="bg-primary text-slate-900 px-8 py-4 rounded-xl font-bold flex items-center gap-2">
                     <span class="material-symbols-outlined">map</span>
-                    Open Interactive Map
+                    {{ __('web.landing.open_map') }}
                 </button>
             </div>
             <div class="flex-1 w-full">

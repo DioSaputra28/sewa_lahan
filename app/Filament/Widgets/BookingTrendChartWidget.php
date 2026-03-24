@@ -17,7 +17,7 @@ class BookingTrendChartWidget extends ChartWidget
         'xl' => 1,
     ];
 
-    protected ?string $heading = 'Tren Booking';
+    public ?string $heading = 'Tren Booking';
 
     protected ?string $maxHeight = '200px';
 

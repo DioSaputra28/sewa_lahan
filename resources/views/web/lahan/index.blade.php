@@ -22,8 +22,8 @@
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Breadcrumbs & Header -->
     <div class="mb-8">
-        <h1 class="text-4xl font-black tracking-tight mb-2">Find Your Trading Space</h1>
-        <p class="text-slate-600 dark:text-slate-400">Discover premium stall locations across major markets.</p>
+        <h1 class="text-4xl font-black tracking-tight mb-2">{{ __('web.lahan.index.page_title') }}</h1>
+        <p class="text-slate-600 dark:text-slate-400">{{ __('web.lahan.index.page_subtitle') }}</p>
     </div>
 
     <div class="flex flex-col lg:flex-row gap-8">
@@ -37,7 +37,7 @@
                     <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                         <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">tune</span>
-                            Filters
+                            {{ __('web.lahan.index.filters') }}
                         </h2>
 
                         <!-- Search (by market name) -->
@@ -53,11 +53,11 @@
 
                         <!-- Region -->
                         <div class="mb-6">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Region</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_region') }}</label>
                             <div class="space-y-2">
                                 <button type="submit" name="region" value="" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ empty($filters['region']) ? 'bg-primary/10 text-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400' }}">
                                     <span class="material-symbols-outlined {{ empty($filters['region']) ? 'text-primary' : '' }}">location_on</span>
-                                    All Regions
+                                    {{ __('web.lahan.index.filter_all_regions') }}
                                 </button>
                                 @foreach ($regions as $region)
                                     <button type="submit" name="region" value="{{ $region }}"
@@ -71,7 +71,7 @@
 
                         <!-- Size -->
                         <div class="mb-6">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Stall Size</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_stall_size') }}</label>
                             <div class="grid grid-cols-2 gap-2">
                                 @foreach ($sizeBuckets as $key => $bucket)
                                     <button type="submit" name="size" value="{{ $key }}"
@@ -84,7 +84,7 @@
 
                         <!-- Price -->
                         <div class="mb-6">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Price / Month</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_price_month') }}</label>
                             <div class="space-y-2">
                                 @foreach ($priceBuckets as $key => $bucket)
                                     <button type="submit" name="price" value="{{ $key }}"
@@ -101,7 +101,7 @@
                             <a href="{{ route('lahan.index', ['sort' => $filters['sort'] ?? 'newest']) }}"
                                class="w-full py-2.5 border border-red-200 dark:border-red-800 text-red-500 font-bold rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 text-sm">
                                 <span class="material-symbols-outlined text-sm">clear</span>
-                                Clear Filters
+                                {{ __('web.lahan.index.filter_clear') }}
                             </a>
                         @endif
                     </div>
@@ -109,10 +109,10 @@
                     <!-- Promotions / Help -->
                     <div class="bg-slate-900 rounded-xl p-6 text-white overflow-hidden relative">
                         <div class="relative z-10">
-                            <h3 class="font-bold mb-2">Need Help?</h3>
-                            <p class="text-sm text-slate-400 mb-4">Our support team is available 24/7 for consultation.</p>
+                            <h3 class="font-bold mb-2">{{ __('web.lahan.index.promo_need_help') }}</h3>
+                            <p class="text-sm text-slate-400 mb-4">{{ __('web.lahan.index.promo_desc') }}</p>
                             <a class="inline-flex items-center text-primary text-sm font-bold hover:underline" href="{{ route('contact') }}">
-                                Contact Support
+                                {{ __('web.lahan.index.promo_link') }}
                                 <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span>
                             </a>
                         </div>
@@ -128,11 +128,11 @@
         <div class="flex-1">
             <div class="flex items-center justify-between mb-6">
                 <p class="text-sm text-slate-500">
-                    Showing <span class="text-slate-900 dark:text-slate-100 font-bold">{{ $plots->count() }}</span>
-                    of <span class="font-bold">{{ $plots->total() }}</span> available stalls
+                    {{ __('web.lahan.index.showing') }} <span class="text-slate-900 dark:text-slate-100 font-bold">{{ $plots->count() }}</span>
+                    {{ __('web.lahan.index.showing_of') }} <span class="font-bold">{{ $plots->total() }}</span> {{ __('web.lahan.index.showing_available') }}
                 </p>
                 <div class="flex items-center gap-2">
-                    <span class="text-sm text-slate-500">Sort by:</span>
+                    <span class="text-sm text-slate-500">{{ __('web.lahan.index.sort_by') }}</span>
                     <form id="sort-form" method="GET" action="{{ route('lahan.index') }}" class="relative">
                         @foreach (array_filter($filters) as $key => $val)
                             @if ($key !== 'sort')
@@ -141,10 +141,10 @@
                         @endforeach
                         <select name="sort" onchange="document.getElementById('sort-form').submit()"
                                 class="text-sm border-none bg-transparent focus:ring-0 font-medium cursor-pointer appearance-none pr-6">
-                            <option value="newest" {{ ($filters['sort'] ?? 'newest') === 'newest' ? 'selected' : '' }}>Newest First</option>
-                            <option value="price_asc" {{ ($filters['sort'] ?? '') === 'price_asc' ? 'selected' : '' }}>Price: Low to High</option>
-                            <option value="price_desc" {{ ($filters['sort'] ?? '') === 'price_desc' ? 'selected' : '' }}>Price: High to Low</option>
-                            <option value="size_desc" {{ ($filters['sort'] ?? '') === 'size_desc' ? 'selected' : '' }}>Size: Largest</option>
+                            <option value="newest" {{ ($filters['sort'] ?? 'newest') === 'newest' ? 'selected' : '' }}>{{ __('web.lahan.index.sort_newest') }}</option>
+                            <option value="price_asc" {{ ($filters['sort'] ?? '') === 'price_asc' ? 'selected' : '' }}>{{ __('web.lahan.index.sort_price_asc') }}</option>
+                            <option value="price_desc" {{ ($filters['sort'] ?? '') === 'price_desc' ? 'selected' : '' }}>{{ __('web.lahan.index.sort_price_desc') }}</option>
+                            <option value="size_desc" {{ ($filters['sort'] ?? '') === 'size_desc' ? 'selected' : '' }}>{{ __('web.lahan.index.sort_size_desc') }}</option>
                         </select>
                     </form>
                 </div>
@@ -153,8 +153,8 @@
             @if ($plots->isEmpty())
                 <div class="text-center py-16">
                     <span class="material-symbols-outlined text-6xl text-slate-300 mb-4">storefront</span>
-                    <p class="text-slate-500 text-lg mb-4">No stalls match your filters.</p>
-                    <a href="{{ route('lahan.index') }}" class="text-primary font-bold hover:underline">Clear filters</a>
+                    <p class="text-slate-500 text-lg mb-4">{{ __('web.lahan.index.empty') }}</p>
+                    <a href="{{ route('lahan.index') }}" class="text-primary font-bold hover:underline">{{ __('web.lahan.index.empty_clear') }}</a>
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -181,20 +181,20 @@
                                 </p>
                                 <div class="flex items-center justify-between py-3 border-y border-slate-100 dark:border-slate-800 mb-4">
                                     <div class="flex flex-col">
-                                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Size</span>
+                                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{{ __('web.lahan.index.label_size') }}</span>
                                         <span class="text-sm font-semibold">{{ $formattedSize }}</span>
                                     </div>
                                     <div class="flex flex-col text-right">
-                                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Type</span>
+                                        <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{{ __('web.lahan.index.label_type') }}</span>
                                         <span class="text-sm font-semibold">{{ $plot->type ?? '—' }}</span>
                                     </div>
                                 </div>
-                                <div class="flex items-center justify-between">
-                                    <div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="min-w-0">
                                         <span class="text-xl font-black text-primary">{{ $formattedPrice }}</span>
-                                        <span class="text-xs text-slate-400">/mo</span>
+                                        <span class="text-xs text-slate-400">{{ __('web.lahan.index.label_per_month') }}</span>
                                     </div>
-                                    <span class="px-4 py-2 bg-primary/20 text-slate-900 font-bold text-xs rounded-lg hover:bg-primary transition-colors">Details</span>
+                                    <span class="shrink-0 whitespace-nowrap px-3 py-2 bg-primary/20 text-slate-900 font-bold text-xs rounded-lg hover:bg-primary transition-colors">{{ __('web.lahan.index.btn_details') }}</span>
                                 </div>
                             </div>
                         </a>

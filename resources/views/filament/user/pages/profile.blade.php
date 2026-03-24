@@ -8,7 +8,7 @@
             <div class="grid gap-6 px-6 py-8 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
                 <div class="space-y-4">
                     <span class="inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-amber-700 ring-1 ring-amber-200 dark:bg-white/5 dark:text-amber-300 dark:ring-amber-400/20">
-                        Account Settings
+                        Pengaturan Akun
                     </span>
                     <div class="space-y-3">
                         <h2 class="max-w-3xl text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl dark:text-white">

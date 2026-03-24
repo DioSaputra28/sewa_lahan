@@ -15,6 +15,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Filament\Support\RawJs;
 
 class PlotForm
 {
@@ -154,6 +155,8 @@ class PlotForm
                             ->label('Harga bulanan')
                             ->placeholder('Contoh: 15000000')
                             ->helperText('Masukkan harga dasar per bulan tanpa titik atau simbol rupiah. Boleh dikosongkan jika harga tahunan diisi.')
+                            ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+                            ->stripCharacters('.')
                             ->requiredWithout('base_price_yearly')
                             ->validationMessages([
                                 'required_without' => 'Minimal salah satu harga sewa harus diisi: bulanan atau tahunan.',
@@ -166,6 +169,8 @@ class PlotForm
                             ->label('Harga tahunan')
                             ->placeholder('Contoh: 150000000')
                             ->helperText('Masukkan harga dasar per tahun tanpa titik atau simbol rupiah. Boleh dikosongkan jika harga bulanan diisi.')
+                            ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+                            ->stripCharacters('.')
                             ->requiredWithout('base_price_monthly')
                             ->validationMessages([
                                 'required_without' => 'Minimal salah satu harga sewa harus diisi: bulanan atau tahunan.',

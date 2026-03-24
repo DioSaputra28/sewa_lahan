@@ -15,7 +15,7 @@ class Profile extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserCircle;
 
-    protected static ?string $navigationLabel = 'Profile';
+    protected static ?string $navigationLabel = 'Profil';
 
     protected static ?int $navigationSort = 90;
 
@@ -72,9 +72,14 @@ class Profile extends Page
 
         Notification::make()
             ->success()
-            ->title('Profile berhasil diperbarui.')
+            ->title('Profil berhasil diperbarui.')
             ->body('Perubahan akunmu sudah tersimpan.')
             ->send();
+    }
+
+    public function getTitle(): string
+    {
+        return 'Profil Akun';
     }
 
     public function getUser(): User

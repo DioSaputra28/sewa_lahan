@@ -49,7 +49,7 @@ class InvoiceForm
                 Section::make('Konteks sewa')
                     ->schema([
                         Placeholder::make('booking_reference')
-                            ->label('Booking request')
+                            ->label('Pengajuan booking')
                             ->content(fn (?Invoice $record): string => $record?->bookingRequest ? '#'.$record->bookingRequest->id : '-'),
                         Placeholder::make('plot_name')
                             ->label('Lahan')
@@ -102,7 +102,7 @@ class InvoiceForm
                             ->dehydrated(false)
                             ->formatStateUsing(fn ($state, ?Invoice $record): string => number_format((int) ($state ?? $record?->penalty_amount ?? 0), 0, ',', '.')),
                         TextInput::make('total_amount')
-                            ->label('Total invoice')
+                            ->label('Total tagihan')
                             ->prefix('Rp')
                             ->disabled()
                             ->dehydrated(false)
@@ -129,7 +129,7 @@ class InvoiceForm
                                     ->disabled()
                                     ->dehydrated(false),
                                 TextInput::make('qty')
-                                    ->label('Qty')
+                                    ->label('Jumlah')
                                     ->disabled()
                                     ->dehydrated(false),
                                 TextInput::make('unit_price')
@@ -169,7 +169,7 @@ class InvoiceForm
                             ->label('Total pembayaran')
                             ->content(fn (?Invoice $record): string => currencyLabel($record?->latestPaymentAttemptRecord()?->total_payment)),
                         Placeholder::make('latest_attempt_expired')
-                            ->label('Expired at')
+                            ->label('Kedaluwarsa pada')
                             ->content(fn (?Invoice $record): string => $record?->latestPaymentAttemptRecord()?->expired_at?->format('d M Y H:i') ?? '-'),
                         Placeholder::make('latest_attempt_checkout')
                             ->label('Link pembayaran')

@@ -10,6 +10,26 @@ use Illuminate\Database\Seeder;
 
 class MarketDemoSeeder extends Seeder
 {
+    /**
+     * Fixed Unsplash image URLs for demo plots (stable across seedings).
+     * Each plot gets 2 images: primary (sort_order=1) and secondary (sort_order=2).
+     * URLs must be stable so updateOrCreate produces consistent results.
+     */
+    private const DEMO_IMAGES = [
+        // Pasar Induk Kebumen - Blok A
+        1 => ['primary' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=800&q=80'],
+        2 => ['primary' => 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80'],
+        // Pasar Induk Kebumen - Blok B
+        3 => ['primary' => 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1506619216599-9d16d0903dfd?w=800&q=80'],
+        4 => ['primary' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&q=80'],
+        // Pasar Pagi Nusantara - Blok C
+        5 => ['primary' => 'https://images.unsplash.com/photo-1608686207856-001b95cf60ca?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1567306301408-8b9e76ae1ef7?w=800&q=80'],
+        6 => ['primary' => 'https://images.unsplash.com/photo-1517059924944-89e7b50e5f3b?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1601599561213-832382fd07ba?w=800&q=80'],
+        // Pasar Pagi Nusantara - Blok D
+        7 => ['primary' => 'https://images.unsplash.com/photo-1534723452862-4c874018d66d?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1567306221408-8b9e76ae1ef7?w=800&q=80'],
+        8 => ['primary' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80', 'secondary' => 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80'],
+    ];
+
     public function run(): void
     {
         $markets = [
@@ -71,6 +91,8 @@ class MarketDemoSeeder extends Seeder
             ],
         ];
 
+        $plotCounter = 0;
+
         foreach ($markets as $marketData) {
             $areas = $marketData['areas'];
             unset($marketData['areas']);
@@ -109,6 +131,9 @@ class MarketDemoSeeder extends Seeder
                         ],
                     );
 
+                    $plotCounter++;
+                    $imageUrls = self::DEMO_IMAGES[$plotCounter] ?? self::DEMO_IMAGES[1];
+
                     PlotImage::query()->updateOrCreate(
                         [
                             'plot_id' => $plot->id,
@@ -116,7 +141,7 @@ class MarketDemoSeeder extends Seeder
                         ],
                         [
                             'plot_id' => $plot->id,
-                            'image_path' => 'plots/demo-'.$plot->id.'-1.jpg',
+                            'image_path' => $imageUrls['primary'],
                             'is_primary' => true,
                             'sort_order' => 1,
                         ],
@@ -129,7 +154,7 @@ class MarketDemoSeeder extends Seeder
                         ],
                         [
                             'plot_id' => $plot->id,
-                            'image_path' => 'plots/demo-'.$plot->id.'-2.jpg',
+                            'image_path' => $imageUrls['secondary'],
                             'is_primary' => false,
                             'sort_order' => 2,
                         ],

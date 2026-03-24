@@ -37,9 +37,7 @@
         @foreach ($this->getPlots() as $plot)
             @php
                 $primaryImage = $plot->images->firstWhere('is_primary', true) ?? $plot->images->first();
-                $imageUrl = $primaryImage && \Illuminate\Support\Facades\Storage::disk('public')->exists($primaryImage->image_path)
-                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($primaryImage->image_path)
-                    : null;
+                $imageUrl = $primaryImage?->url;
                 $priceParts = [];
 
                 if ($plot->base_price_monthly) {

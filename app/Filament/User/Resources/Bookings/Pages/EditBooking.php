@@ -9,6 +9,11 @@ class EditBooking extends EditRecord
 {
     protected static string $resource = BookingResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Detail Booking';
+    }
+
     protected function getHeaderActions(): array
     {
         return [];

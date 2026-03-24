@@ -18,11 +18,13 @@ class HomeController extends Controller
 
         // Preview: latest 6 available plots for home showcase
         $previewPlots = $query->latest()->limit(6)->get();
+        $previewPlotsTotal = (clone $query)->count();
 
         $regions = $this->listingQuery->availableRegions();
 
         return view('web.landing', [
             'previewPlots' => $previewPlots,
+            'previewPlotsTotal' => $previewPlotsTotal,
             'regions' => $regions,
         ]);
     }

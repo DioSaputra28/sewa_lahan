@@ -26,7 +26,11 @@ class BookingResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'id';
 
-    protected static ?string $navigationLabel = 'My Bookings';
+    protected static ?string $navigationLabel = 'Booking Saya';
+
+    protected static ?string $modelLabel = 'booking';
+
+    protected static ?string $pluralModelLabel = 'booking';
 
     public static function form(Schema $schema): Schema
     {

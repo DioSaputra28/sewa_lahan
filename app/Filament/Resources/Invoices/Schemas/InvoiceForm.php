@@ -9,6 +9,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\RawJs;
 
 class InvoiceForm
 {
@@ -63,6 +64,8 @@ class InvoiceForm
                         TextInput::make('discount_amount')
                             ->label('Diskon')
                             ->prefix('Rp')
+                            ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+                            ->stripCharacters('.')
                             ->numeric()
                             ->minValue(0)
                             ->default(0)
@@ -71,6 +74,8 @@ class InvoiceForm
                         TextInput::make('penalty_amount')
                             ->label('Penalti')
                             ->prefix('Rp')
+                            ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+                            ->stripCharacters('.')
                             ->numeric()
                             ->minValue(0)
                             ->default(0)
@@ -103,12 +108,16 @@ class InvoiceForm
                                 TextInput::make('unit_price')
                                     ->label('Harga satuan')
                                     ->prefix('Rp')
+                                    ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+                                    ->stripCharacters('.')
                                     ->numeric()
                                     ->minValue(0)
                                     ->required(),
                                 TextInput::make('total')
                                     ->label('Total item')
                                     ->prefix('Rp')
+                                    ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+                                    ->stripCharacters('.')
                                     ->numeric()
                                     ->minValue(0)
                                     ->required()

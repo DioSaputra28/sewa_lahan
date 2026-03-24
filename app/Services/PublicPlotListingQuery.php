@@ -125,6 +125,7 @@ class PublicPlotListingQuery
 
     /**
      * Resolve image URL with fallback.
+     * Supports external URLs (http://, https://) and local storage paths.
      */
     public function resolveImageUrl(?string $path): ?string
     {
@@ -132,14 +133,15 @@ class PublicPlotListingQuery
             return null;
         }
 
-        $url = Storage::url($path);
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
 
-        // Check if the file actually exists in storage
         if (! Storage::exists($path)) {
             return null;
         }
 
-        return $url;
+        return Storage::url($path);
     }
 
     /**

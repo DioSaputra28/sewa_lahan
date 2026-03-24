@@ -9,6 +9,11 @@ class ListLeases extends ListRecords
 {
     protected static string $resource = LeaseResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Kontrak Saya';
+    }
+
     protected function getHeaderActions(): array
     {
         return [];

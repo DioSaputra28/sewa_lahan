@@ -10,6 +10,11 @@ class ListBookings extends ListRecords
 {
     protected static string $resource = BookingResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Booking Saya';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

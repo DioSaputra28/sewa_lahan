@@ -12,6 +12,11 @@ class BrowsePlots extends Page
 
     protected string $view = 'filament.user.resources.bookings.pages.browse-plots';
 
+    public function getTitle(): string
+    {
+        return 'Cari Lahan';
+    }
+
     public function getPlots()
     {
         return Plot::query()

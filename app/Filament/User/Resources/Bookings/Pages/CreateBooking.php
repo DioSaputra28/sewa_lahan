@@ -6,6 +6,7 @@ use App\Actions\Bookings\CreateUserBookingRequest;
 use App\Filament\User\Resources\Bookings\BookingResource;
 use App\Models\BookingRequest;
 use App\Models\Plot;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Auth;
@@ -52,5 +53,27 @@ class CreateBooking extends CreateRecord
     protected function getCreatedNotificationTitle(): ?string
     {
         return 'Booking berhasil diajukan.';
+    }
+
+    public function getTitle(): string
+    {
+        return 'Ajukan Booking';
+    }
+
+    public function canCreateAnother(): bool
+    {
+        return false;
+    }
+
+    protected function getCreateFormAction(): Action
+    {
+        return parent::getCreateFormAction()
+            ->label('Ajukan Booking');
+    }
+
+    protected function getCancelFormAction(): Action
+    {
+        return parent::getCancelFormAction()
+            ->label('Kembali');
     }
 }

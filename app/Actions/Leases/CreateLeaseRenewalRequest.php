@@ -63,6 +63,7 @@ class CreateLeaseRenewalRequest
             $bookingRequest = BookingRequest::query()->create([
                 'user_id' => $lease->tenant_id,
                 'plot_id' => $lease->plot_id,
+                'renewal_of_lease_id' => $lease->id,
                 'term_type' => $lease->term_type,
                 'duration' => $duration,
                 'start_date' => $startDate,
@@ -71,7 +72,7 @@ class CreateLeaseRenewalRequest
                 'final_price' => null,
                 'status' => 'pending',
                 'payment_status' => 'unpaid',
-                'notes' => BookingRequest::renewalMarkerForLease($lease),
+                'notes' => null,
             ]);
 
             BookingStatusEvent::query()->create([

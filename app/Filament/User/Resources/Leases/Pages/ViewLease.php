@@ -15,6 +15,11 @@ class ViewLease extends ViewRecord
 {
     protected static string $resource = LeaseResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Detail Kontrak';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -100,7 +100,7 @@ it('shows renewal action only for active leases without unresolved renewals', fu
         'quoted_price' => 24000000,
         'status' => 'pending',
         'payment_status' => 'unpaid',
-        'notes' => BookingRequest::renewalMarkerForLease($lease),
+        'renewal_of_lease_id' => $lease->id,
     ]);
 
     Livewire::test(ViewLease::class, ['record' => $lease->getRouteKey()])
@@ -131,7 +131,7 @@ it('creates a renewal booking request from the lease detail modal', function () 
     $renewalBooking = BookingRequest::query()
         ->where('user_id', $context['customer']->id)
         ->where('plot_id', $context['plot']->id)
-        ->where('notes', 'like', '%'.BookingRequest::renewalMarkerForLease($lease).'%')
+        ->where('renewal_of_lease_id', $lease->id)
         ->latest('id')
         ->first();
 
@@ -140,7 +140,8 @@ it('creates a renewal booking request from the lease detail modal', function () 
         ->and($renewalBooking?->duration)->toBe(3)
         ->and($renewalBooking?->status)->toBe('pending')
         ->and($renewalBooking?->payment_status)->toBe('unpaid')
-        ->and($renewalBooking?->notes)->toContain(BookingRequest::renewalMarkerForLease($lease));
+        ->and($renewalBooking?->renewal_of_lease_id)->toBe($lease->id)
+        ->and($renewalBooking?->notes)->toBeNull();
 });
 
 it('links a newly created lease back to the source lease for renewals', function () {
@@ -163,7 +164,7 @@ it('links a newly created lease back to the source lease for renewals', function
         'status' => 'approved',
         'payment_status' => 'paid',
         'approved_at' => now(),
-        'notes' => BookingRequest::renewalMarkerForLease($sourceLease),
+        'renewal_of_lease_id' => $sourceLease->id,
     ]);
 
     $invoice = Invoice::query()->create([
