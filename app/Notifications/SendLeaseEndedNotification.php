@@ -31,6 +31,7 @@ class SendLeaseEndedNotification extends Notification implements ShouldQueue
         $endDateLabel = $lease->end_date?->format('d M Y') ?? '-';
 
         return (new MailMessage)
+            ->from((string) config('mail.from.address', 'hello@example.com'), 'Admin + '.get_site_name())
             ->subject('Kontrak lahan kamu telah berakhir')
             ->greeting('Halo '.$notifiable->name.',')
             ->line('Kontrak '.$lease->lease_number.' untuk '.$plotName.' telah berakhir.')

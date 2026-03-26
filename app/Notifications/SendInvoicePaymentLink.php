@@ -30,6 +30,7 @@ class SendInvoicePaymentLink extends Notification
         $dueLabel = $paymentDueAt?->format('d M Y H:i') ?? $this->invoice->due_date?->format('d M Y');
 
         return (new MailMessage)
+            ->from((string) config('mail.from.address', 'hello@example.com'), 'Admin + '.get_site_name())
             ->subject('Pengajuan booking diterima dan invoice siap dibayar')
             ->greeting('Halo '.$notifiable->name.',')
             ->line('Pengajuan booking kamu untuk '.$plotName.' sudah diterima.')

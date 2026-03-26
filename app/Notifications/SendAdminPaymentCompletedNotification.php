@@ -35,6 +35,7 @@ class SendAdminPaymentCompletedNotification extends Notification implements Shou
         $whatsAppUrl = $this->whatsAppUrl($customer?->phone);
 
         $mailMessage = (new MailMessage)
+            ->from((string) config('mail.from.address', 'hello@example.com'), 'System')
             ->subject('Pembayaran customer berhasil diproses')
             ->greeting('Halo Admin,')
             ->line('Pembayaran berhasil diterima untuk invoice '.($invoice?->invoice_number ?? '-').'.')

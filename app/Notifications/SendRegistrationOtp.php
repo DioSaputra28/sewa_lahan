@@ -23,6 +23,7 @@ class SendRegistrationOtp extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->from((string) config('mail.from.address', 'hello@example.com'), 'Admin + '.get_site_name())
             ->subject('Kode OTP Registrasi Akun')
             ->greeting('Halo '.$notifiable->name.',')
             ->line('Gunakan kode OTP berikut untuk mengaktifkan akunmu:')
