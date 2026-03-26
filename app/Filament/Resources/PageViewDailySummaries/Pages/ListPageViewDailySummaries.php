@@ -55,6 +55,7 @@ class ListPageViewDailySummaries extends ListRecords
             Action::make('debugStatus')
                 ->label('Debug Status')
                 ->icon('heroicon-o-bug-ant')
+                ->visible(fn (): bool => (bool) config('analytics.page_views.debug', false))
                 ->modalHeading('Debug Tracking Halaman')
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel('Tutup')
