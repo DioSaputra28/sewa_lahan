@@ -2,7 +2,8 @@
 
 return [
     'page_views' => [
-        'enabled' => true,
+        'enabled' => env('ANALYTICS_PAGE_VIEWS_ENABLED', true),
+        'debug' => env('ANALYTICS_PAGE_VIEWS_DEBUG', false),
         'cookie_name' => 'pv_sid',
         'cookie_minutes' => 60 * 24 * 365,
         'excluded_environments' => ['testing'],

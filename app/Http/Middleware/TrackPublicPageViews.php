@@ -6,6 +6,7 @@ use App\Models\PageViewEvent;
 use App\Models\Plot;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,8 +22,11 @@ class TrackPublicPageViews
     public function handle(Request $request, Closure $next): Response
     {
         $response = $next($request);
+        $reason = null;
 
-        if (! $this->shouldTrack($request, $response)) {
+        if (! $this->shouldTrack($request, $response, $reason)) {
+            $this->debugLogSkip($request, $reason);
+
             return $response;
         }
 
@@ -43,6 +47,8 @@ class TrackPublicPageViews
                     'query' => $request->query(),
                 ],
             ]);
+
+            $this->debugLogTracked($request, $sessionId, $plotId);
         } catch (Throwable $exception) {
             report($exception);
         }
@@ -50,25 +56,35 @@ class TrackPublicPageViews
         return $response;
     }
 
-    protected function shouldTrack(Request $request, Response $response): bool
+    protected function shouldTrack(Request $request, Response $response, ?string &$reason = null): bool
     {
         if (! config('analytics.page_views.enabled', true)) {
+            $reason = 'tracking-disabled';
+
             return false;
         }
 
         if (! $request->isMethod('GET')) {
+            $reason = 'not-get-request';
+
             return false;
         }
 
         if (! $response->isSuccessful()) {
+            $reason = 'response-not-successful';
+
             return false;
         }
 
         if ($this->isInExcludedEnvironment()) {
+            $reason = 'excluded-environment';
+
             return false;
         }
 
         if ($this->isBot($request)) {
+            $reason = 'bot-user-agent';
+
             return false;
         }
 
@@ -76,12 +92,20 @@ class TrackPublicPageViews
         $trackedRoutes = array_keys(config('analytics.page_views.tracked_routes', []));
 
         if (! is_string($routeName) || ! in_array($routeName, $trackedRoutes, true)) {
+            $reason = 'route-not-tracked';
+
             return false;
         }
 
         $contentType = (string) $response->headers->get('Content-Type', '');
 
-        return str_contains($contentType, 'text/html');
+        if (! str_contains($contentType, 'text/html')) {
+            $reason = 'non-html-response';
+
+            return false;
+        }
+
+        return true;
     }
 
     protected function isInExcludedEnvironment(): bool
@@ -169,5 +193,35 @@ class TrackPublicPageViews
         }
 
         return null;
+    }
+
+    protected function debugLogSkip(Request $request, ?string $reason): void
+    {
+        if (! config('analytics.page_views.debug', false)) {
+            return;
+        }
+
+        Log::info('Page view tracking skipped', [
+            'reason' => $reason,
+            'path' => '/'.$request->path(),
+            'route' => $request->route()?->getName(),
+            'method' => $request->method(),
+            'content_type' => $request->headers->get('Accept'),
+            'user_agent' => $request->userAgent(),
+        ]);
+    }
+
+    protected function debugLogTracked(Request $request, string $sessionId, ?int $plotId): void
+    {
+        if (! config('analytics.page_views.debug', false)) {
+            return;
+        }
+
+        Log::info('Page view tracked', [
+            'path' => '/'.$request->path(),
+            'route' => $request->route()?->getName(),
+            'session_id' => $sessionId,
+            'plot_id' => $plotId,
+        ]);
     }
 }
