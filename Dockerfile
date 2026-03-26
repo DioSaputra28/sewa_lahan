@@ -12,7 +12,6 @@ RUN composer install \
     --no-interaction \
     --no-progress \
     --optimize-autoloader \
-    --classmap-authoritative \
     --no-scripts \
     --ignore-platform-req=ext-intl
 
