@@ -193,7 +193,7 @@ class EditBookingRequest extends EditRecord
     protected function rejectBooking(array $data): mixed
     {
         $record = $this->getRecord();
-        $formData = $this->form->getState();
+        $notes = data_get($this, 'data.notes');
         $adminId = Auth::id();
 
         if (! $adminId) {
@@ -214,10 +214,16 @@ class EditBookingRequest extends EditRecord
             'rejection_reason',
         ]);
 
-        DB::transaction(function () use ($adminId, $data, $formData, $record, $beforeBooking): void {
+        DB::transaction(function () use ($adminId, $data, $notes, $record, $beforeBooking): void {
             $record->update([
-                'notes' => $formData['notes'] ?? null,
+                'notes' => $notes,
                 'status' => 'rejected',
+                'payment_status' => 'cancelled',
+                'final_price' => null,
+                'payment_due_at' => null,
+                'expires_at' => null,
+                'approved_by' => null,
+                'approved_at' => null,
                 'rejected_at' => now(),
                 'rejection_reason' => $data['rejection_reason'],
             ]);

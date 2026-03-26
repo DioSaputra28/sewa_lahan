@@ -9,9 +9,12 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentAttempt;
 use App\Models\PaymentEvent;
+use App\Models\User;
+use App\Notifications\SendAdminPaymentCompletedNotification;
 use App\Services\PakasirService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 class SyncPakasirPaymentStatus
 {
@@ -50,6 +53,7 @@ class SyncPakasirPaymentStatus
             $expiredAt = isset($transaction['expired_at']) ? Carbon::parse($transaction['expired_at']) : $payment->provider_expired_at;
             $completedAt = isset($transaction['completed_at']) ? Carbon::parse($transaction['completed_at']) : null;
             $localStatus = $businessExpired ? 'expired' : $this->mapPaymentStatus($providerStatus);
+            $wasPaid = $payment->status === 'paid';
 
             $payment->update([
                 'provider_status' => $providerStatus,
@@ -179,6 +183,21 @@ class SyncPakasirPaymentStatus
                         ]),
                     ],
                 );
+            }
+
+            if (($localStatus === 'paid') && (! $wasPaid)) {
+                $admins = User::query()
+                    ->whereHas('roles', fn ($query) => $query->where('name', 'admin'))
+                    ->whereNotNull('email')
+                    ->get();
+
+                if ($admins->isNotEmpty()) {
+                    $paymentSnapshot = $payment->fresh(['invoice.bookingRequest.plot', 'user']);
+
+                    DB::afterCommit(function () use ($admins, $paymentSnapshot): void {
+                        Notification::send($admins, new SendAdminPaymentCompletedNotification($paymentSnapshot));
+                    });
+                }
             }
 
             $this->activityLog->handle(

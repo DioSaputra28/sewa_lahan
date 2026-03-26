@@ -16,4 +16,4 @@ docker-compose.yaml
 README.md
 *.md
 .env
-.env.example
+.env.*

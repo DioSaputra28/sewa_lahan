@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 FROM composer:2.8 AS vendor
 
 WORKDIR /app
@@ -10,9 +12,9 @@ RUN composer install \
     --no-interaction \
     --no-progress \
     --optimize-autoloader \
+    --classmap-authoritative \
     --no-scripts \
     --ignore-platform-req=ext-intl
-
 
 FROM node:22-bookworm-slim AS frontend
 
@@ -27,17 +29,16 @@ COPY config ./config
 COPY routes ./routes
 COPY --from=vendor /app/vendor ./vendor
 
-RUN npm ci
-RUN npm run build
-
+RUN npm ci && npm run build
 
 FROM php:8.4-fpm-bookworm AS runtime
 
 WORKDIR /var/www/html
 
-ENV APP_ENV=production
-ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS=0
-ENV TRUST_PROXIES=*
+ENV APP_ENV=production \
+    PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
+    TRUST_PROXIES=* \
+    RUN_MIGRATIONS=false
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -60,6 +61,7 @@ RUN apt-get update \
         gd \
         intl \
         opcache \
+        pcntl \
         pdo_mysql \
         pdo_sqlite \
         zip \
@@ -69,6 +71,7 @@ RUN apt-get update \
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
+
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint

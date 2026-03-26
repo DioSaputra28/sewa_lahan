@@ -47,6 +47,14 @@ class InvoicesTable
                         'expired' => 'Kadaluarsa',
                         'cancelled' => 'Dibatalkan',
                         default => ucfirst($state),
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'unpaid' => 'warning',
+                        'pending' => 'info',
+                        'paid' => 'success',
+                        'expired' => 'gray',
+                        'cancelled' => 'gray',
+                        default => 'gray',
                     }),
                 TextColumn::make('paid_at')
                     ->label('Dibayar pada')

@@ -42,6 +42,10 @@
     $areaName = $plot->area?->name ?? '—';
     $mapsUrl = $plot->market->maps_url ?? '#';
     $breadcrumbName = $plot->name;
+    $isUserAuthenticated = \Filament\Facades\Filament::getPanel('user', isStrict: false)?->auth()->check() ?? false;
+    $rentNowUrl = $isUserAuthenticated
+        ? \App\Filament\User\Resources\Bookings\BookingResource::getUrl('plot', ['plot' => $plot], panel: 'user')
+        : route('filament.user.auth.register');
 @endphp
 
 {{-- Breadcrumb --}}
@@ -145,9 +149,9 @@
                     </div>
                     <p id="price-sub" class="text-xs text-slate-400 mb-6">{{ __('web.single.label_per_year') }} {{ $yearlyPrice }}</p>
 
-                    <button class="w-full py-4 bg-primary hover:bg-primary/90 text-slate-900 font-bold text-base rounded-xl shadow-md transition-all active:scale-[0.98]">
+                    <a href="{{ $rentNowUrl }}" class="inline-flex w-full items-center justify-center py-4 bg-primary hover:bg-primary/90 text-slate-900 font-bold text-base rounded-xl shadow-md transition-all active:scale-[0.98]">
                         {{ __('web.single.btn_rent_now') }}
-                    </button>
+                    </a>
                     <p class="text-center text-xs text-slate-400 mt-3">{{ __('web.single.disclaimer_no_fees') }}</p>
                 </div>
 

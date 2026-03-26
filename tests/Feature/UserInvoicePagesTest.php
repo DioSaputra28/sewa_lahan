@@ -183,11 +183,16 @@ it('creates a new payment link from the customer invoice detail page', function 
     actingAs($context['customer']);
     useUserPanel();
 
+    $expectedCheckoutUrl = 'https://app.pakasir.com/pay/demo-project/12000000?'.http_build_query([
+        'order_id' => 'INV-RETRY-ACTION-001',
+        'redirect' => route('filament.user.pages.dashboard'),
+    ]);
+
     Livewire::test(ViewInvoice::class, ['record' => $invoice->getRouteKey()])
         ->callAction('createPaymentAttempt')
         ->assertHasNoActionErrors()
         ->assertActionVisible('continuePayment')
-        ->assertActionHasUrl('continuePayment', 'https://app.pakasir.com/pay/demo-project/12000000?order_id=INV-RETRY-ACTION-001')
+        ->assertActionHasUrl('continuePayment', $expectedCheckoutUrl)
         ->assertActionHidden('createPaymentAttempt');
 
     assertDatabaseHas('payment_attempts', [
@@ -195,7 +200,7 @@ it('creates a new payment link from the customer invoice detail page', function 
         'provider_order_id' => $invoice->invoice_number,
         'payment_method' => null,
         'payment_number' => null,
-        'checkout_url' => 'https://app.pakasir.com/pay/demo-project/12000000?order_id=INV-RETRY-ACTION-001',
+        'checkout_url' => $expectedCheckoutUrl,
         'status' => 'pending',
     ]);
 });

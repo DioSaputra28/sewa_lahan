@@ -11,8 +11,11 @@ use App\Models\Market;
 use App\Models\Payment;
 use App\Models\PaymentAttempt;
 use App\Models\Plot;
+use App\Models\Role;
 use App\Models\User;
+use App\Notifications\SendAdminPaymentCompletedNotification;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\postJson;
@@ -33,7 +36,7 @@ it('creates a pakasir hosted payment link from an invoice', function () {
         'invoice_id' => $context['invoice']->id,
         'provider' => 'pakasir',
         'provider_order_id' => $context['invoice']->invoice_number,
-        'checkout_url' => 'https://app.pakasir.com/pay/demo-project/'.$context['invoice']->total_amount.'?order_id='.$context['invoice']->invoice_number,
+        'checkout_url' => expectedPakasirCheckoutUrl($context['invoice']->invoice_number, $context['invoice']->total_amount),
         'payment_method' => null,
     ]);
 });
@@ -66,7 +69,7 @@ it('syncs pakasir payment status and creates lease when transaction is completed
         'provider_order_id' => $context['invoice']->invoice_number,
         'payment_method' => null,
         'request_amount' => $context['invoice']->total_amount,
-        'checkout_url' => 'https://app.pakasir.com/pay/demo-project/'.$context['invoice']->total_amount.'?order_id='.$context['invoice']->invoice_number,
+        'checkout_url' => expectedPakasirCheckoutUrl($context['invoice']->invoice_number, $context['invoice']->total_amount),
         'status' => 'pending',
         'requested_at' => now(),
     ]);
@@ -130,7 +133,7 @@ it('handles pakasir webhook and updates local payment state', function () {
         'provider_order_id' => $context['invoice']->invoice_number,
         'payment_method' => null,
         'request_amount' => $context['invoice']->total_amount,
-        'checkout_url' => 'https://app.pakasir.com/pay/demo-project/'.$context['invoice']->total_amount.'?order_id='.$context['invoice']->invoice_number,
+        'checkout_url' => expectedPakasirCheckoutUrl($context['invoice']->invoice_number, $context['invoice']->total_amount),
         'status' => 'pending',
         'requested_at' => now(),
     ]);
@@ -193,7 +196,7 @@ it('accepts pakasir webhook requests without csrf token', function () {
         'provider_order_id' => $context['invoice']->invoice_number,
         'payment_method' => null,
         'request_amount' => $context['invoice']->total_amount,
-        'checkout_url' => 'https://app.pakasir.com/pay/demo-project/'.$context['invoice']->total_amount.'?order_id='.$context['invoice']->invoice_number,
+        'checkout_url' => expectedPakasirCheckoutUrl($context['invoice']->invoice_number, $context['invoice']->total_amount),
         'status' => 'pending',
         'requested_at' => now(),
     ]);
@@ -228,6 +231,83 @@ it('accepts pakasir webhook requests without csrf token', function () {
         'event_source' => 'webhook',
         'provider_order_id' => $context['invoice']->invoice_number,
     ]);
+});
+
+it('sends payment success email to all admins with customer contact details and whatsapp link', function () {
+    Notification::fake();
+
+    $context = seedPaymentContext();
+    $context['customer']->update([
+        'phone' => '081234567890',
+    ]);
+
+    $adminRole = Role::query()->firstOrCreate(['name' => 'admin']);
+    $firstAdmin = User::factory()->create([
+        'status' => 'active',
+        'email_verified_at' => now(),
+    ]);
+    $firstAdmin->roles()->syncWithoutDetaching([$adminRole->id]);
+
+    $secondAdmin = User::factory()->create([
+        'status' => 'active',
+        'email_verified_at' => now(),
+    ]);
+    $secondAdmin->roles()->syncWithoutDetaching([$adminRole->id]);
+
+    $payment = Payment::query()->create([
+        'invoice_id' => $context['invoice']->id,
+        'user_id' => $context['customer']->id,
+        'provider' => 'pakasir',
+        'provider_project_slug' => 'demo-project',
+        'provider_order_id' => $context['invoice']->invoice_number,
+        'provider_status' => 'pending',
+        'provider_payment_method' => null,
+        'amount' => $context['invoice']->total_amount,
+        'status' => 'pending',
+    ]);
+
+    PaymentAttempt::query()->create([
+        'invoice_id' => $context['invoice']->id,
+        'user_id' => $context['customer']->id,
+        'provider' => 'pakasir',
+        'provider_project_slug' => 'demo-project',
+        'provider_order_id' => $context['invoice']->invoice_number,
+        'payment_method' => null,
+        'request_amount' => $context['invoice']->total_amount,
+        'checkout_url' => expectedPakasirCheckoutUrl($context['invoice']->invoice_number, $context['invoice']->total_amount),
+        'status' => 'pending',
+        'requested_at' => now(),
+    ]);
+
+    Http::fake([
+        'app.pakasir.com/api/transactiondetail*' => Http::response([
+            'transaction' => [
+                'amount' => $context['invoice']->total_amount,
+                'order_id' => $context['invoice']->invoice_number,
+                'project' => 'demo-project',
+                'status' => 'completed',
+                'payment_method' => 'qris',
+                'payment_number' => 'QRIS-DEMO-004',
+                'completed_at' => now()->toIso8601String(),
+            ],
+        ]),
+    ]);
+
+    app(SyncPakasirPaymentStatus::class)->handle($payment);
+
+    Notification::assertSentTo(
+        [$firstAdmin, $secondAdmin],
+        SendAdminPaymentCompletedNotification::class,
+        function (SendAdminPaymentCompletedNotification $notification, array $channels) use ($context, $firstAdmin): bool {
+            $payload = $notification->toArray($firstAdmin);
+            $mailMessage = $notification->toMail($firstAdmin);
+
+            return in_array('mail', $channels, true)
+                && ($payload['customer_email'] ?? null) === $context['customer']->email
+                && ($payload['customer_phone'] ?? null) === '081234567890'
+                && (string) $mailMessage->actionUrl === 'https://wa.me/6281234567890';
+        },
+    );
 });
 
 function seedPaymentContext(array $bookingOverrides = []): array
@@ -306,4 +386,12 @@ function seedPaymentContext(array $bookingOverrides = []): array
     ]);
 
     return compact('customer', 'market', 'area', 'plot', 'booking', 'invoice');
+}
+
+function expectedPakasirCheckoutUrl(string $invoiceNumber, int $amount): string
+{
+    return 'https://app.pakasir.com/pay/demo-project/'.$amount.'?'.http_build_query([
+        'order_id' => $invoiceNumber,
+        'redirect' => route('filament.user.pages.dashboard'),
+    ]);
 }

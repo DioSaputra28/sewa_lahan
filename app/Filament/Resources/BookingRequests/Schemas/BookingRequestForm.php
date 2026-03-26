@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
+use Illuminate\Support\HtmlString;
 
 class BookingRequestForm
 {
@@ -115,23 +116,32 @@ class BookingRequestForm
                     ->schema([
                         Placeholder::make('booking_status')
                             ->label('Status booking')
-                            ->content(fn (?BookingRequest $record): string => match ($record?->status) {
-                                'pending' => 'Pending',
-                                'approved' => 'Approved',
-                                'rejected' => 'Rejected',
-                                'cancelled' => 'Cancelled',
-                                'expired' => 'Expired',
-                                default => '-',
+                            ->content(function (?BookingRequest $record): HtmlString {
+                                [$label, $backgroundColor, $textColor] = match ($record?->status) {
+                                    'pending' => ['Pending', '#fef3c7', '#92400e'],
+                                    'approved' => ['Approved', '#dcfce7', '#166534'],
+                                    'rejected' => ['Rejected', '#fee2e2', '#991b1b'],
+                                    'cancelled' => ['Cancelled', '#e2e8f0', '#334155'],
+                                    'expired' => ['Expired', '#e2e8f0', '#334155'],
+                                    default => ['-', '#f1f5f9', '#475569'],
+                                };
+
+                                return self::makeStatusBadge($label, $backgroundColor, $textColor, 'booking_status_badge');
                             }),
                         Placeholder::make('payment_status_label')
                             ->label('Status pembayaran')
-                            ->content(fn (?BookingRequest $record): string => match ($record?->payment_status) {
-                                'unpaid' => 'Belum dibayar',
-                                'pending' => 'Menunggu pembayaran',
-                                'paid' => 'Sudah dibayar',
-                                'failed' => 'Gagal',
-                                'expired' => 'Kadaluarsa',
-                                default => '-',
+                            ->content(function (?BookingRequest $record): HtmlString {
+                                [$label, $backgroundColor, $textColor] = match ($record?->payment_status) {
+                                    'unpaid' => ['Belum dibayar', '#fef3c7', '#92400e'],
+                                    'pending' => ['Menunggu pembayaran', '#dbeafe', '#1d4ed8'],
+                                    'paid' => ['Sudah dibayar', '#dcfce7', '#166534'],
+                                    'failed' => ['Gagal', '#fee2e2', '#991b1b'],
+                                    'cancelled' => ['Dibatalkan', '#e2e8f0', '#334155'],
+                                    'expired' => ['Kadaluarsa', '#e2e8f0', '#334155'],
+                                    default => ['-', '#f1f5f9', '#475569'],
+                                };
+
+                                return self::makeStatusBadge($label, $backgroundColor, $textColor, 'payment_status_badge');
                             }),
                         Placeholder::make('approved_at_label')
                             ->label('Disetujui pada')
@@ -151,5 +161,12 @@ class BookingRequestForm
                         'md' => 3,
                     ]),
             ]);
+    }
+
+    protected static function makeStatusBadge(string $label, string $backgroundColor, string $textColor, string $testId): HtmlString
+    {
+        return new HtmlString(
+            "<span data-testid=\"{$testId}\" style=\"display:inline-flex;align-items:center;border-radius:9999px;padding:0.25rem 0.625rem;font-size:0.75rem;font-weight:700;line-height:1;background:{$backgroundColor};color:{$textColor};\">{$label}</span>"
+        );
     }
 }

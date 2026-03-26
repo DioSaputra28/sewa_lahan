@@ -141,6 +141,7 @@ class BookingForm
                                 'pending' => 'Pending',
                                 'paid' => 'Paid',
                                 'failed' => 'Gagal',
+                                'cancelled' => 'Dibatalkan',
                                 'expired' => 'Expired',
                                 default => '-',
                             }),

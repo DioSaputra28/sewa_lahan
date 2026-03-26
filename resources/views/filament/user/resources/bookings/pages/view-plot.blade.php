@@ -1,107 +1,227 @@
 <x-filament-panels::page>
     @php
         $plot = $this->plot;
-        $priceParts = [];
-
-        if ($plot->base_price_monthly) {
-            $priceParts[] = 'Bulanan: Rp ' . number_format($plot->base_price_monthly, 0, ',', '.');
-        }
-
-        if ($plot->base_price_yearly) {
-            $priceParts[] = 'Tahunan: Rp ' . number_format($plot->base_price_yearly, 0, ',', '.');
-        }
+        $imgService = app(\App\Services\PublicPlotListingQuery::class);
+        $monthlyPrice = $imgService->formatPriceFull((int) $plot->base_price_monthly);
+        $yearlyPrice = $imgService->formatPriceFull((int) $plot->base_price_yearly);
+        $dimension = $plot->length.' × '.$plot->width.' m';
+        $areaSize = rtrim(rtrim(number_format((float) $plot->area_square_meters, 2, '.', ''), '0'), '.').' m²';
+        $floorLabel = $plot->floor_level ?? '—';
+        $typeLabel = $plot->type ?? '—';
+        $marketName = $plot->market->name ?? '—';
+        $marketCity = $plot->market->city ?? '—';
+        $marketAddress = $plot->market->address ?? '—';
+        $areaName = $plot->area?->name ?? '—';
+        $mapsUrl = $plot->market->maps_url ?? '#';
+        $amenities = [
+            ['icon' => 'heroicon-o-bolt', 'key' => 'facility_electricity'],
+            ['icon' => 'heroicon-o-wifi', 'key' => 'facility_wifi'],
+            ['icon' => 'heroicon-o-truck', 'key' => 'facility_parking'],
+            ['icon' => 'heroicon-o-archive-box-arrow-down', 'key' => 'facility_loading'],
+            ['icon' => 'heroicon-o-shield-check', 'key' => 'facility_security'],
+            ['icon' => 'heroicon-o-sparkles', 'key' => 'facility_cleaning'],
+            ['icon' => 'heroicon-o-beaker', 'key' => 'facility_water'],
+            ['icon' => 'heroicon-o-credit-card', 'key' => 'facility_payment'],
+        ];
     @endphp
 
     <div class="space-y-8 scheme-light dark:scheme-dark">
-        <div class="grid gap-8 xl:grid-cols-[1.25fr_0.95fr]">
-            <div class="space-y-4">
-                @php
-                    $primaryImage = $plot->images->firstWhere('is_primary', true) ?? $plot->images->first();
-                    $primaryImageUrl = $primaryImage?->url;
-                @endphp
+        <section class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-900 md:p-7">
+            <div class="mb-5 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-gray-400">
+                <span class="text-primary">{{ __('web.single.breadcrumb_lahan') }}</span>
+                <span>/</span>
+                <span>{{ $plot->name }}</span>
+            </div>
 
-                <div class="overflow-hidden rounded-[1.9rem] border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-gray-900 dark:shadow-none">
-                    @if ($primaryImageUrl)
-                        <img src="{{ $primaryImageUrl }}" alt="{{ $plot->name }}" class="h-[22rem] w-full object-cover lg:h-[26rem]">
-                    @else
-                        <div class="relative flex h-[22rem] items-center justify-center overflow-hidden bg-radial from-amber-100 via-white to-slate-100 lg:h-[26rem] dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.18),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(56,189,248,0.12),_transparent_40%)] dark:bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.12),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(148,163,184,0.08),_transparent_40%)]"></div>
-                            <div class="relative flex max-w-sm flex-col items-center gap-3 px-6 text-center">
-                                <div class="flex h-14 w-14 items-center justify-center rounded-full bg-white text-amber-600 shadow-sm ring-1 ring-slate-200 dark:bg-white/5 dark:text-amber-300 dark:ring-white/10">
-                                    <x-filament::icon icon="heroicon-o-photo" class="h-7 w-7" />
-                                </div>
-                                <div class="space-y-1">
-                                    <p class="text-base font-semibold text-slate-800 dark:text-white">Preview utama belum tersedia</p>
-                                    <p class="text-sm leading-6 text-slate-500 dark:text-gray-400">Informasi lahan tetap lengkap dan bisa langsung dipakai untuk pengajuan booking.</p>
-                                </div>
-                            </div>
+            <div class="flex flex-col gap-8 xl:flex-row">
+                <div class="flex-1">
+                    <div class="relative mb-4 overflow-hidden rounded-3xl bg-slate-100 dark:bg-gray-950">
+                        <img src="{{ $this->primaryImage }}" alt="{{ $plot->name }}" class="h-[24rem] w-full object-cover lg:h-[28rem]" />
+                        <div class="absolute left-4 top-4 flex gap-2">
+                            <span class="rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700">
+                                {{ __('web.single.badge_available_now') }}
+                            </span>
+                            <span class="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                                {{ __('web.single.badge_premium') }}
+                            </span>
                         </div>
-                    @endif
-                </div>
+                    </div>
 
-                @if ($plot->images->count() > 1)
-                    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                        @foreach ($plot->images as $image)
-                            @php
-                                $thumbnailUrl = $image->url;
-                            @endphp
-
-                            <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-white/10 dark:bg-gray-900 dark:shadow-none">
-                                @if ($thumbnailUrl)
-                                    <img src="{{ $thumbnailUrl }}" alt="{{ $plot->name }}" class="aspect-[4/3] w-full object-cover">
-                                @else
-                                    <div class="flex aspect-[4/3] items-center justify-center bg-slate-100 text-slate-400 dark:bg-gray-950 dark:text-gray-600">
-                                        <x-filament::icon icon="heroicon-o-photo" class="h-6 w-6" />
-                                    </div>
-                                @endif
+                    <div class="grid grid-cols-4 gap-3">
+                        @foreach ($this->allImages as $imageUrl)
+                            <div class="overflow-hidden rounded-xl border border-slate-200/70 bg-white dark:border-white/10 dark:bg-gray-900">
+                                <img class="aspect-square w-full object-cover" src="{{ $imageUrl }}" alt="{{ $plot->name }}">
                             </div>
                         @endforeach
                     </div>
-                @endif
+                </div>
+
+                <aside class="w-full xl:w-[24rem]">
+                    <div class="space-y-5">
+                        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900">
+                            <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('web.single.label_premium_stall') }}</p>
+                            <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-900 dark:text-white">{{ $plot->name }}</h1>
+                            <p class="mt-2 text-sm text-slate-500 dark:text-gray-400">{{ $marketName }} — {{ $areaName }}</p>
+
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:bg-white/5 dark:text-gray-300">
+                                    <x-filament::icon icon="heroicon-o-square-3-stack-3d" class="h-4 w-4" />{{ $areaSize }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:bg-white/5 dark:text-gray-300">
+                                    <x-filament::icon icon="heroicon-o-building-office-2" class="h-4 w-4" />Floor {{ $floorLabel }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:bg-white/5 dark:text-gray-300">
+                                    <x-filament::icon icon="heroicon-o-tag" class="h-4 w-4" />{{ $typeLabel }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900">
+                            <div class="mb-1">
+                                <span class="text-3xl font-black text-slate-900 dark:text-white">Rp {{ $monthlyPrice }}</span>
+                                <span class="text-sm text-slate-400">{{ __('web.single.label_per_month') }}</span>
+                            </div>
+                            <p class="mb-4 text-xs text-slate-400">Rp {{ $yearlyPrice }} {{ __('web.single.label_per_year') }}</p>
+
+                            <a
+                                href="{{ \App\Filament\User\Resources\Bookings\BookingResource::getUrl('create', ['plot' => $plot->id]) }}"
+                                class="inline-flex w-full items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-bold text-slate-900 transition hover:bg-primary/90"
+                            >
+                                {{ __('web.single.btn_rent_now') }}
+                            </a>
+                            <p class="mt-3 text-center text-xs text-slate-400">{{ __('web.single.disclaimer_no_fees') }}</p>
+                        </div>
+
+                        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-900">
+                            <h3 class="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-slate-400">{{ __('web.single.location_title') }}</h3>
+                            <div class="space-y-3 text-sm">
+                                <div>
+                                    <p class="text-xs text-slate-400">{{ __('web.single.label_market') }}</p>
+                                    <p class="font-semibold text-slate-900 dark:text-white">{{ $marketName }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-400">{{ __('web.single.label_area_zone') }}</p>
+                                    <p class="font-semibold text-slate-900 dark:text-white">{{ $areaName }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-400">{{ __('web.single.label_city') }}</p>
+                                    <p class="font-semibold text-slate-900 dark:text-white">{{ $marketCity }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-slate-400">{{ __('web.single.label_address') }}</p>
+                                    <p class="font-semibold text-slate-900 dark:text-white">{{ $marketAddress }}</p>
+                                </div>
+                                @if ($mapsUrl && $mapsUrl !== '#')
+                                    <div>
+                                        <p class="text-xs text-slate-400">{{ __('web.single.label_maps') }}</p>
+                                        <a class="font-semibold text-primary hover:underline" href="{{ $mapsUrl }}" target="_blank" rel="noopener noreferrer">
+                                            {{ __('web.single.link_google_maps') }}
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
+        </section>
 
-            <div class="space-y-6 rounded-[1.9rem] border border-slate-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900 dark:shadow-none">
+        <section class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900">
+            <h2 class="mb-5 text-lg font-black text-slate-900 dark:text-white">{{ __('web.single.specs_title') }}</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+                <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-white/10 dark:bg-white/5">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{{ __('web.single.label_dimension') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $dimension }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-white/10 dark:bg-white/5">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{{ __('web.single.label_total_area') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $areaSize }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-white/10 dark:bg-white/5">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{{ __('web.single.label_floor') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $floorLabel }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-white/10 dark:bg-white/5">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{{ __('web.single.label_type') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $typeLabel }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-white/10 dark:bg-white/5">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{{ __('web.single.label_status') }}</p>
+                    <p class="mt-1 text-sm font-bold text-primary">{{ __('web.single.status_available') }}</p>
+                </div>
+                <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-center dark:border-white/10 dark:bg-white/5">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">{{ __('web.single.label_position') }}</p>
+                    <p class="mt-1 text-sm font-bold text-slate-900 dark:text-white">{{ $plot->location_note ?? $plot->name }}</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid gap-8 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900 lg:grid-cols-3">
+            <div class="lg:col-span-2">
+                <h2 class="mb-4 text-2xl font-black text-slate-900 dark:text-white">{{ __('web.single.about_title') }}</h2>
+                <p class="text-sm leading-7 text-slate-600 dark:text-gray-300">
+                    {{ $plot->description ?: __('web.single.about_empty') }}
+                </p>
+            </div>
+            <div>
+                <h2 class="mb-4 text-lg font-black text-slate-900 dark:text-white">{{ __('web.single.facilities_title') }}</h2>
+                <ul class="space-y-3">
+                    @foreach ($amenities as $amenity)
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="rounded-lg bg-primary/10 p-1.5 text-primary">
+                                <x-filament::icon :icon="$amenity['icon']" class="h-4 w-4" />
+                            </span>
+                            <span class="font-medium text-slate-700 dark:text-gray-200">{{ __('web.single.'.$amenity['key']) }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </section>
+
+        <section class="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900">
+            <div class="mb-6 flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-medium uppercase tracking-[0.26em] text-amber-600 dark:text-amber-300">{{ $plot->market?->name }}</p>
-                    <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{{ $plot->name }}</h1>
-                    <p class="mt-2 text-sm text-slate-500 dark:text-gray-400">{{ $plot->area?->name ?? 'Tanpa area' }} • {{ ucfirst($plot->type) }}</p>
+                    <h2 class="text-2xl font-black text-slate-900 dark:text-white">{{ __('web.single.related_title') }}</h2>
+                    <p class="text-sm text-slate-500 dark:text-gray-400">{{ __('web.single.related_subtitle', ['market' => $marketName]) }}</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3 rounded-2xl bg-slate-50 p-3 text-sm dark:bg-gray-950">
-                    <div class="rounded-xl bg-white px-4 py-3 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-gray-500">Ukuran</p>
-                        <p class="mt-1.5 text-base font-medium text-slate-900 dark:text-gray-100">{{ number_format((float) $plot->length, 2, ',', '.') }} x {{ number_format((float) $plot->width, 2, ',', '.') }} m</p>
-                    </div>
-                    <div class="rounded-xl bg-white px-4 py-3 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-gray-500">Luas</p>
-                        <p class="mt-1.5 text-base font-medium text-slate-900 dark:text-gray-100">{{ number_format((float) $plot->area_square_meters, 2, ',', '.') }} m2</p>
-                    </div>
-                    <div class="rounded-xl bg-white px-4 py-3 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-gray-500">Level</p>
-                        <p class="mt-1.5 text-base font-medium text-slate-900 dark:text-gray-100">{{ $plot->floor_level ?: '-' }}</p>
-                    </div>
-                    <div class="rounded-xl bg-white px-4 py-3 ring-1 ring-slate-200/70 dark:bg-white/5 dark:ring-white/10">
-                        <p class="text-[11px] uppercase tracking-[0.18em] text-slate-400 dark:text-gray-500">Catatan lokasi</p>
-                        <p class="mt-1.5 text-base font-medium text-slate-900 dark:text-gray-100">{{ $plot->location_note ?: '-' }}</p>
-                    </div>
-                </div>
-
-                <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100">
-                    <p class="text-[11px] uppercase tracking-[0.2em] text-amber-600 dark:text-amber-300">Harga tersedia</p>
-                    <p class="mt-2 text-base font-medium leading-7">{{ implode(' | ', $priceParts) ?: 'Harga belum tersedia' }}</p>
-                </div>
-
-                <div>
-                    <p class="text-sm leading-7 text-slate-600 dark:text-gray-400">{{ $plot->description ?: 'Belum ada deskripsi tambahan untuk lahan ini.' }}</p>
-                </div>
-
-                <a
-                    href="{{ \App\Filament\User\Resources\Bookings\BookingResource::getUrl('create', ['plot' => $plot->id]) }}"
-                    class="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-500 dark:bg-white dark:text-gray-950 dark:hover:bg-amber-400"
-                >
-                    Ajukan Booking
+                <a class="text-sm font-bold text-primary hover:underline" href="{{ \App\Filament\User\Resources\Bookings\BookingResource::getUrl('browse') }}">
+                    {{ __('web.single.related_view_all') }}
                 </a>
             </div>
-        </div>
+
+            @if ($this->relatedPlots->isEmpty())
+                <p class="py-6 text-center text-sm text-slate-500 dark:text-gray-400">{{ __('web.single.related_empty') }}</p>
+            @else
+                <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                    @foreach ($this->relatedPlots as $relatedPlot)
+                        @php
+                            $relatedImage = $imgService->primaryImageUrl($relatedPlot);
+                            $relatedPrice = $imgService->formatPrice((int) $relatedPlot->base_price_monthly);
+                            $relatedSize = $relatedPlot->length.' × '.$relatedPlot->width.' m';
+                        @endphp
+                        <a
+                            href="{{ \App\Filament\User\Resources\Bookings\BookingResource::getUrl('plot', ['plot' => $relatedPlot]) }}"
+                            class="group block overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-gray-900"
+                        >
+                            <img class="h-40 w-full object-cover" src="{{ $relatedImage }}" alt="{{ $relatedPlot->name }}">
+                            <div class="p-4">
+                                <h3 class="text-sm font-bold text-slate-900 transition group-hover:text-primary dark:text-white">{{ $relatedPlot->name }}</h3>
+                                <p class="mb-3 mt-1 text-xs text-slate-400">{{ $relatedPlot->market->city ?? '' }}</p>
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-[11px] text-slate-400">{{ __('web.single.label_size') }}</p>
+                                        <p class="text-sm font-bold text-slate-700 dark:text-gray-200">{{ $relatedSize }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-black text-primary">{{ $relatedPrice }}</p>
+                                        <p class="text-[10px] text-slate-400">{{ __('web.single.label_per_month') }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </section>
     </div>
 </x-filament-panels::page>

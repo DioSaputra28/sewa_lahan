@@ -8,6 +8,9 @@
     <div class="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
         OTP dikirim ke <span class="font-semibold text-slate-900 dark:text-white">{{ $this->getPendingUser()->email }}</span>
     </div>
+    <div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-300/30 dark:bg-amber-300/10 dark:text-amber-100">
+        Jika kode OTP belum masuk, coba cek folder <span class="font-semibold">Spam</span> atau <span class="font-semibold">Junk</span> di email kamu.
+    </div>
 
     <form
         wire:submit="verify"

@@ -41,6 +41,20 @@ it('shows available term types on the booking create page based on plot prices',
     $response->assertSee('Tahunan');
 });
 
+it('shows complete plot detail sections on the user plot page', function () {
+    $context = seedUserBookingContext();
+
+    actingAs($context['customer']);
+
+    get('/user/bookings/plots/'.$context['plot']->id)
+        ->assertSuccessful()
+        ->assertSee('Detail Lokasi')
+        ->assertSee('Detail Lahan')
+        ->assertSee('Tentang Stall Ini')
+        ->assertSee('Fasilitas')
+        ->assertSee('Stall Serupa di Sekitar');
+});
+
 it('uses custom action labels on the booking create page', function () {
     $context = seedUserBookingContext();
 

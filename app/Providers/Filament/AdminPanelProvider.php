@@ -30,6 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName(fn (): string => get_site_name())
             ->favicon(fn (): ?string => get_versioned_favicon_url())
+            ->globalSearch(false)
             ->colors([
                 'primary' => Color::Green,
             ])

@@ -10,6 +10,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
+use Illuminate\Support\HtmlString;
 
 class InvoiceForm
 {
@@ -32,13 +33,17 @@ class InvoiceForm
                             ->content(fn (?Invoice $record): string => $record?->bookingRequest ? '#'.$record->bookingRequest->id : '-'),
                         Placeholder::make('invoice_status_label')
                             ->label('Status invoice')
-                            ->content(fn (?Invoice $record): string => match ($record?->status) {
-                                'unpaid' => 'Belum dibayar',
-                                'pending' => 'Pending',
-                                'paid' => 'Sudah dibayar',
-                                'expired' => 'Kadaluarsa',
-                                'cancelled' => 'Dibatalkan',
-                                default => '-',
+                            ->content(function (?Invoice $record): HtmlString {
+                                [$label, $backgroundColor, $textColor] = match ($record?->status) {
+                                    'unpaid' => ['Belum dibayar', '#fef3c7', '#92400e'],
+                                    'pending' => ['Pending', '#dbeafe', '#1d4ed8'],
+                                    'paid' => ['Sudah dibayar', '#dcfce7', '#166534'],
+                                    'expired' => ['Kadaluarsa', '#e2e8f0', '#334155'],
+                                    'cancelled' => ['Dibatalkan', '#fee2e2', '#991b1b'],
+                                    default => ['-', '#f1f5f9', '#475569'],
+                                };
+
+                                return self::makeStatusBadge($label, $backgroundColor, $textColor, 'invoice_status_badge');
                             }),
                         Placeholder::make('payment_attempt_count')
                             ->label('Jumlah link pembayaran')
@@ -159,5 +164,12 @@ class InvoiceForm
                         'md' => 3,
                     ]),
             ]);
+    }
+
+    protected static function makeStatusBadge(string $label, string $backgroundColor, string $textColor, string $testId): HtmlString
+    {
+        return new HtmlString(
+            "<span data-testid=\"{$testId}\" style=\"display:inline-flex;align-items:center;border-radius:9999px;padding:0.25rem 0.625rem;font-size:0.75rem;font-weight:700;line-height:1;background:{$backgroundColor};color:{$textColor};\">{$label}</span>"
+        );
     }
 }

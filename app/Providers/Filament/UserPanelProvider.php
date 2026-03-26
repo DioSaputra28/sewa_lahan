@@ -32,6 +32,7 @@ class UserPanelProvider extends PanelProvider
             ->registration(Register::class)
             ->brandName(fn (): string => get_site_name())
             ->favicon(fn (): ?string => get_versioned_favicon_url())
+            ->globalSearch(false)
             ->viteTheme('resources/css/filament/user/theme.css')
             ->colors([
                 'primary' => Color::Green,

@@ -59,6 +59,13 @@ class LeasesTable
                         'ended' => 'Berakhir',
                         'cancelled' => 'Dibatalkan',
                         default => $state ? ucfirst($state) : '-',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'draft' => 'gray',
+                        'active' => 'success',
+                        'ended' => 'warning',
+                        'cancelled' => 'danger',
+                        default => 'gray',
                     }),
                 TextColumn::make('activated_at')
                     ->label('Aktif pada')

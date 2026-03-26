@@ -60,6 +60,14 @@ class BookingRequestsTable
                         'cancelled' => 'Cancelled',
                         'expired' => 'Expired',
                         default => ucfirst($state),
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        'cancelled' => 'gray',
+                        'expired' => 'gray',
+                        default => 'gray',
                     }),
                 TextColumn::make('payment_status')
                     ->label('Status bayar')
@@ -69,8 +77,18 @@ class BookingRequestsTable
                         'pending' => 'Pending',
                         'paid' => 'Paid',
                         'failed' => 'Gagal',
+                        'cancelled' => 'Dibatalkan',
                         'expired' => 'Expired',
                         default => ucfirst($state),
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'unpaid' => 'warning',
+                        'pending' => 'info',
+                        'paid' => 'success',
+                        'failed' => 'danger',
+                        'cancelled' => 'gray',
+                        'expired' => 'gray',
+                        default => 'gray',
                     }),
                 TextColumn::make('created_at')
                     ->label('Diajukan')
@@ -94,6 +112,7 @@ class BookingRequestsTable
                         'pending' => 'Pending',
                         'paid' => 'Paid',
                         'failed' => 'Gagal',
+                        'cancelled' => 'Dibatalkan',
                         'expired' => 'Expired',
                     ]),
                 SelectFilter::make('market_id')

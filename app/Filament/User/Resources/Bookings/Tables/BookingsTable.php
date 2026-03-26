@@ -34,10 +34,27 @@ class BookingsTable
                     ->formatStateUsing(fn ($state): string => 'Rp '.number_format((int) ($state ?? 0), 0, ',', '.')),
                 TextColumn::make('status')
                     ->label('Status booking')
-                    ->badge(),
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'pending' => 'Pending',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                        'expired' => 'Expired',
+                        'cancelled' => 'Cancelled',
+                        default => $state ? ucfirst($state) : '-',
+                    }),
                 TextColumn::make('payment_status')
                     ->label('Status bayar')
-                    ->badge(),
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'unpaid' => 'Belum dibayar',
+                        'pending' => 'Pending',
+                        'paid' => 'Paid',
+                        'failed' => 'Gagal',
+                        'cancelled' => 'Dibatalkan',
+                        'expired' => 'Expired',
+                        default => $state ? ucfirst($state) : '-',
+                    }),
                 TextColumn::make('created_at')
                     ->label('Diajukan')
                     ->dateTime('d M Y H:i')
@@ -60,6 +77,7 @@ class BookingsTable
                         'pending' => 'Pending',
                         'paid' => 'Paid',
                         'failed' => 'Gagal',
+                        'cancelled' => 'Dibatalkan',
                         'expired' => 'Expired',
                     ]),
             ])

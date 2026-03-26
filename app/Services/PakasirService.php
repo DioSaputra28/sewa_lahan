@@ -11,12 +11,20 @@ class PakasirService
 {
     public function paymentUrl(Invoice $invoice): string
     {
+        $redirectUrl = $this->paymentRedirectUrl();
+
         return $this->baseUrl()
             .'/pay/'.rawurlencode($this->projectSlug())
             .'/'.$invoice->total_amount
             .'?'.http_build_query([
                 'order_id' => $invoice->invoice_number,
+                'redirect' => $redirectUrl,
             ]);
+    }
+
+    public function paymentRedirectUrl(): string
+    {
+        return route('filament.user.pages.dashboard');
     }
 
     public function createTransaction(Invoice $invoice, string $method): array

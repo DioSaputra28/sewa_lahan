@@ -32,6 +32,7 @@ class CreatePakasirPaymentAttempt
                 throw new RuntimeException('Invoice yang sudah dibayar atau kedaluwarsa tidak bisa dibuatkan link pembayaran baru.');
             }
 
+            $redirectUrl = $this->pakasirService->paymentRedirectUrl();
             $checkoutUrl = $this->pakasirService->paymentUrl($invoice);
             $beforeInvoice = $this->activityLog->snapshot($invoice, [
                 'id',
@@ -83,7 +84,7 @@ class CreatePakasirPaymentAttempt
                     'total_payment' => null,
                     'payment_number' => null,
                     'checkout_url' => $checkoutUrl,
-                    'redirect_url' => null,
+                    'redirect_url' => $redirectUrl,
                     'qris_only' => false,
                     'is_sandbox' => $this->pakasirService->isSandbox(),
                     'status' => 'pending',

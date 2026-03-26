@@ -9,6 +9,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class LeaseForm
 {
@@ -97,12 +98,16 @@ class LeaseForm
                             ->formatStateUsing(fn ($state, ?Lease $record): string => number_format((int) ($state ?? $record?->deposit_amount ?? 0), 0, ',', '.')),
                         Placeholder::make('status')
                             ->label('Status lease')
-                            ->content(fn (?Lease $record): string => match ($record?->status) {
-                                'draft' => 'Draft',
-                                'active' => 'Aktif',
-                                'ended' => 'Berakhir',
-                                'cancelled' => 'Dibatalkan',
-                                default => '-',
+                            ->content(function (?Lease $record): HtmlString {
+                                [$label, $backgroundColor, $textColor] = match ($record?->status) {
+                                    'draft' => ['Draft', '#e2e8f0', '#334155'],
+                                    'active' => ['Aktif', '#dcfce7', '#166534'],
+                                    'ended' => ['Berakhir', '#dbeafe', '#1d4ed8'],
+                                    'cancelled' => ['Dibatalkan', '#fee2e2', '#991b1b'],
+                                    default => ['-', '#f1f5f9', '#475569'],
+                                };
+
+                                return self::makeStatusBadge($label, $backgroundColor, $textColor, 'lease_status_badge');
                             }),
                     ])
                     ->columns([
@@ -162,5 +167,12 @@ class LeaseForm
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    protected static function makeStatusBadge(string $label, string $backgroundColor, string $textColor, string $testId): HtmlString
+    {
+        return new HtmlString(
+            "<span data-testid=\"{$testId}\" style=\"display:inline-flex;align-items:center;border-radius:9999px;padding:0.25rem 0.625rem;font-size:0.75rem;font-weight:700;line-height:1;background:{$backgroundColor};color:{$textColor};\">{$label}</span>"
+        );
     }
 }

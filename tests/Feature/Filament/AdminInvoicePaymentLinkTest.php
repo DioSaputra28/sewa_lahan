@@ -109,15 +109,20 @@ it('allows admin to create a hosted payment link without choosing a method', fun
         ->callAction('createPaymentAttempt')
         ->assertHasNoActionErrors();
 
+    $expectedCheckoutUrl = 'https://app.pakasir.com/pay/demo-project/12000000?'.http_build_query([
+        'order_id' => 'INV-ADMIN-LINK-001',
+        'redirect' => route('filament.user.pages.dashboard'),
+    ]);
+
     assertDatabaseHas('payment_attempts', [
         'invoice_id' => $invoice->id,
         'provider_order_id' => $invoice->invoice_number,
-        'checkout_url' => 'https://app.pakasir.com/pay/demo-project/12000000?order_id=INV-ADMIN-LINK-001',
+        'checkout_url' => $expectedCheckoutUrl,
         'payment_method' => null,
     ]);
 
     expect(PaymentAttempt::query()->where('invoice_id', $invoice->id)->first()?->checkout_url)
-        ->toBe('https://app.pakasir.com/pay/demo-project/12000000?order_id=INV-ADMIN-LINK-001');
+        ->toBe($expectedCheckoutUrl);
 
     Notification::assertSentTo(
         $customer,

@@ -47,6 +47,14 @@ class PaymentsTable
                         'expired' => 'Kadaluarsa',
                         'cancelled' => 'Dibatalkan',
                         default => ucfirst($state),
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'info',
+                        'paid' => 'success',
+                        'failed' => 'danger',
+                        'expired' => 'gray',
+                        'cancelled' => 'gray',
+                        default => 'gray',
                     }),
                 TextColumn::make('provider_status')
                     ->label('Status provider')

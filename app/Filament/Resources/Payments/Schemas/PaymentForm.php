@@ -7,6 +7,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class PaymentForm
 {
@@ -44,13 +45,17 @@ class PaymentForm
                             ->formatStateUsing(fn ($state, ?Payment $record): string => number_format((int) ($state ?? $record?->amount ?? 0), 0, ',', '.')),
                         Placeholder::make('status_label')
                             ->label('Status payment')
-                            ->content(fn (?Payment $record): string => match ($record?->status) {
-                                'pending' => 'Pending',
-                                'paid' => 'Paid',
-                                'failed' => 'Gagal',
-                                'expired' => 'Kadaluarsa',
-                                'cancelled' => 'Dibatalkan',
-                                default => '-',
+                            ->content(function (?Payment $record): HtmlString {
+                                [$label, $backgroundColor, $textColor] = match ($record?->status) {
+                                    'pending' => ['Pending', '#dbeafe', '#1d4ed8'],
+                                    'paid' => ['Paid', '#dcfce7', '#166534'],
+                                    'failed' => ['Gagal', '#fee2e2', '#991b1b'],
+                                    'expired' => ['Kadaluarsa', '#e2e8f0', '#334155'],
+                                    'cancelled' => ['Dibatalkan', '#e2e8f0', '#334155'],
+                                    default => ['-', '#f1f5f9', '#475569'],
+                                };
+
+                                return self::makeStatusBadge($label, $backgroundColor, $textColor, 'payment_status_badge');
                             }),
                         Placeholder::make('provider_status_label')
                             ->label('Status dari provider')
@@ -68,7 +73,20 @@ class PaymentForm
                             ->content(fn (?Payment $record): string => (string) ($record?->invoice?->paymentAttempts()->count() ?? 0)),
                         Placeholder::make('latest_attempt_status')
                             ->label('Status link terakhir')
-                            ->content(fn (?Payment $record): string => $record?->invoice?->paymentAttempts()->latest()->first()?->status ?? '-'),
+                            ->content(function (?Payment $record): HtmlString {
+                                $status = $record?->invoice?->paymentAttempts()->latest()->first()?->status;
+
+                                [$label, $backgroundColor, $textColor] = match ($status) {
+                                    'pending' => ['Pending', '#dbeafe', '#1d4ed8'],
+                                    'paid' => ['Paid', '#dcfce7', '#166534'],
+                                    'failed' => ['Failed', '#fee2e2', '#991b1b'],
+                                    'expired' => ['Expired', '#e2e8f0', '#334155'],
+                                    'cancelled' => ['Cancelled', '#e2e8f0', '#334155'],
+                                    default => ['-', '#f1f5f9', '#475569'],
+                                };
+
+                                return self::makeStatusBadge($label, $backgroundColor, $textColor, 'latest_attempt_status_badge');
+                            }),
                         Placeholder::make('latest_attempt_amount')
                             ->label('Nominal invoice')
                             ->content(fn (?Payment $record): string => 'Rp '.number_format((int) ($record?->invoice?->paymentAttempts()->latest()->first()?->request_amount ?? 0), 0, ',', '.')),
@@ -121,5 +139,12 @@ class PaymentForm
                         'md' => 2,
                     ]),
             ]);
+    }
+
+    protected static function makeStatusBadge(string $label, string $backgroundColor, string $textColor, string $testId): HtmlString
+    {
+        return new HtmlString(
+            "<span data-testid=\"{$testId}\" style=\"display:inline-flex;align-items:center;border-radius:9999px;padding:0.25rem 0.625rem;font-size:0.75rem;font-weight:700;line-height:1;background:{$backgroundColor};color:{$textColor};\">{$label}</span>"
+        );
     }
 }
