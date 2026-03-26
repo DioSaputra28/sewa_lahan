@@ -12,9 +12,9 @@ class PublicPlotListingQuery
      * Price bucket thresholds (in IDR).
      */
     public const PRICE_BUCKETS = [
-        'under_1m' => ['label' => '< Rp 1 juta', 'max' => 1_000_000],
-        '1m_to_2m' => ['label' => 'Rp 1–2 juta', 'min' => 1_000_000, 'max' => 2_000_000],
-        'over_2m' => ['label' => '> Rp 2 juta',  'min' => 2_000_000],
+        'under_1m' => ['label' => '< Rp 1 JT', 'max' => 1_000_000],
+        '1m_to_2m' => ['label' => 'Rp 1–2 JT', 'min' => 1_000_000, 'max' => 2_000_000],
+        'over_2m' => ['label' => '> Rp 2 JT',  'min' => 2_000_000],
     ];
 
     /**
@@ -53,6 +53,28 @@ class PublicPlotListingQuery
         if ($region && $region !== 'all') {
             $query->whereHas('market', fn ($q) => $q->where('city', $region));
         }
+
+        return $query;
+    }
+
+    /**
+     * Apply search by plot name, market name, and market city.
+     */
+    public function applySearch(Builder $query, ?string $search): Builder
+    {
+        $search = is_string($search) ? trim($search) : '';
+
+        if ($search === '') {
+            return $query;
+        }
+
+        $query->where(function (Builder $nestedQuery) use ($search): void {
+            $nestedQuery->where('name', 'like', "%{$search}%")
+                ->orWhereHas('market', function (Builder $marketQuery) use ($search): void {
+                    $marketQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('city', 'like', "%{$search}%");
+                });
+        });
 
         return $query;
     }
@@ -100,6 +122,38 @@ class PublicPlotListingQuery
         }
         if (isset($bucket['max'])) {
             $query->where('base_price_monthly', '<=', $bucket['max']);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Apply price range filter.
+     */
+    public function applyPriceRange(Builder $query, mixed $minimumPrice, mixed $maximumPrice): Builder
+    {
+        if (is_numeric($minimumPrice)) {
+            $query->where('base_price_monthly', '>=', (int) $minimumPrice);
+        }
+
+        if (is_numeric($maximumPrice)) {
+            $query->where('base_price_monthly', '<=', (int) $maximumPrice);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Apply area range filter.
+     */
+    public function applyAreaRange(Builder $query, mixed $minimumArea, mixed $maximumArea): Builder
+    {
+        if (is_numeric($minimumArea)) {
+            $query->where('area_square_meters', '>=', (float) $minimumArea);
+        }
+
+        if (is_numeric($maximumArea)) {
+            $query->where('area_square_meters', '<=', (float) $maximumArea);
         }
 
         return $query;
@@ -190,10 +244,10 @@ class PublicPlotListingQuery
     public function formatPrice(int $amount): string
     {
         if ($amount >= 1_000_000) {
-            return 'Rp '.number_format($amount / 1_000_000, 1).'M';
+            return 'Rp '.number_format($amount / 1_000_000, 1).' JT';
         }
 
-        return 'Rp '.number_format($amount / 1_000, 0).'k';
+        return 'Rp '.number_format($amount / 1_000, 0).' RB';
     }
 
     /**

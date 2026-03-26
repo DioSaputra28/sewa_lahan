@@ -1,39 +1,68 @@
 <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 pt-16 pb-8">
+    @php
+        $siteName = get_site_name();
+        $siteLogoUrl = get_site_logo_url();
+        $marketLocations = \App\Models\Plot::query()
+            ->with('market:id,city,status')
+            ->where('status', 'available')
+            ->whereHas('market', fn ($query) => $query->where('status', 'active'))
+            ->get()
+            ->pluck('market.city')
+            ->filter()
+            ->unique()
+            ->sort()
+            ->take(4)
+            ->values();
+        $resourceLinks = [
+            ['label' => __('web.footer.resource_home'), 'url' => route('home')],
+            ['label' => __('web.footer.resource_about'), 'url' => route('about')],
+            ['label' => __('web.footer.resource_lahan'), 'url' => route('lahan.index')],
+            ['label' => __('web.footer.resource_contact'), 'url' => route('contact')],
+        ];
+    @endphp
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             <div>
                 <div class="flex items-center gap-2 mb-6">
-                    <div class="flex items-center justify-center size-8 bg-primary rounded-lg text-slate-900">
-                        <span class="material-symbols-outlined font-bold">storefront</span>
-                    </div>
-                    <h2 class="text-xl font-extrabold tracking-tight">PasarSpace</h2>
+                    @if (filled($siteLogoUrl))
+                        <img src="{{ $siteLogoUrl }}" alt="{{ $siteName }}" class="h-8 w-auto rounded-md object-contain">
+                    @else
+                        <div class="flex items-center justify-center size-8 bg-primary rounded-lg text-slate-900">
+                            <span class="material-symbols-outlined font-bold">storefront</span>
+                        </div>
+                    @endif
+                    <h2 class="text-xl font-extrabold tracking-tight">{{ $siteName }}</h2>
                 </div>
                 <p class="text-slate-500 text-sm mb-6">{{ __('web.footer.brand_description') }}</p>
-                <div class="flex gap-4">
-                    <a class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors group" href="#">
-                        <span class="material-symbols-outlined text-slate-600 dark:text-slate-400 group-hover:text-slate-900">public</span>
-                    </a>
-                    <a class="size-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors group" href="#">
-                        <span class="material-symbols-outlined text-slate-600 dark:text-slate-400 group-hover:text-slate-900">alternate_email</span>
-                    </a>
-                </div>
             </div>
             <div>
                 <h4 class="font-bold mb-6">{{ __('web.footer.market_locations') }}</h4>
                 <ul class="space-y-4 text-sm text-slate-500">
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.location_jakarta') }}</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.location_bandung') }}</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.location_surabaya') }}</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.location_medan') }}</a></li>
+                    @forelse ($marketLocations as $marketLocation)
+                        <li>
+                            <a
+                                class="hover:text-primary transition-colors"
+                                href="{{ route('lahan.index', ['region' => $marketLocation]) }}"
+                            >
+                                {{ $marketLocation }}
+                            </a>
+                        </li>
+                    @empty
+                        <li><a class="hover:text-primary transition-colors" href="{{ route('lahan.index') }}">{{ __('web.footer.resource_lahan') }}</a></li>
+                    @endforelse
                 </ul>
             </div>
             <div>
                 <h4 class="font-bold mb-6">{{ __('web.footer.resources') }}</h4>
                 <ul class="space-y-4 text-sm text-slate-500">
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.handbook') }}</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.pricing') }}</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.safety') }}</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.faq') }}</a></li>
+                    @foreach ($resourceLinks as $resourceLink)
+                        <li>
+                            <a class="hover:text-primary transition-colors" href="{{ $resourceLink['url'] }}">
+                                {{ $resourceLink['label'] }}
+                            </a>
+                        </li>
+                    @endforeach
                 </ul>
             </div>
             <div>

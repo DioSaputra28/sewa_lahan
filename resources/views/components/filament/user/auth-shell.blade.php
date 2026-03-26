@@ -9,6 +9,10 @@
     'showSocial' => false,
 ])
 
+@php
+    $siteName = get_site_name();
+@endphp
+
 <div class="relative flex min-h-screen w-full overflow-hidden bg-background-light font-display antialiased dark:bg-background-dark">
     <div class="relative hidden lg:flex lg:w-1/2">
         <div
@@ -23,7 +27,7 @@
                 <div class="rounded-lg bg-primary p-2 text-background-dark">
                     <x-filament::icon icon="heroicon-o-building-storefront" class="h-6 w-6" />
                 </div>
-                <span class="text-2xl font-black tracking-tight">PasarSpace</span>
+                <span class="text-2xl font-black tracking-tight">{{ $siteName }}</span>
             </div>
 
             <div class="max-w-md">
@@ -43,7 +47,7 @@
                 <div class="rounded-lg bg-primary p-2 text-background-dark">
                     <x-filament::icon icon="heroicon-o-building-storefront" class="h-6 w-6" />
                 </div>
-                <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">PasarSpace</span>
+                <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100">{{ $siteName }}</span>
             </div>
 
             <div class="mb-10">

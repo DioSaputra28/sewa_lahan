@@ -21,9 +21,20 @@ class LahanController extends Controller
     {
         $query = $this->listingQuery->baseQuery();
 
+        $this->listingQuery->applySearch($query, $request->query('q'));
         $this->listingQuery->applyRegion($query, $request->query('region'));
         $this->listingQuery->applySize($query, $request->query('size'));
         $this->listingQuery->applyPrice($query, $request->query('price'));
+        $this->listingQuery->applyPriceRange(
+            $query,
+            $request->query('price_min'),
+            $request->query('price_max')
+        );
+        $this->listingQuery->applyAreaRange(
+            $query,
+            $request->query('area_min'),
+            $request->query('area_max')
+        );
 
         // Sort options
         $sort = $request->query('sort', 'newest');
@@ -50,6 +61,11 @@ class LahanController extends Controller
                 'region' => $request->query('region'),
                 'size' => $request->query('size'),
                 'price' => $request->query('price'),
+                'q' => $request->query('q'),
+                'price_min' => $request->query('price_min'),
+                'price_max' => $request->query('price_max'),
+                'area_min' => $request->query('area_min'),
+                'area_max' => $request->query('area_max'),
                 'sort' => $sort,
             ],
         ]);

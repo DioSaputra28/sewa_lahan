@@ -23,13 +23,14 @@
                 <label class="text-sm font-semibold text-slate-700 dark:text-slate-300" for="password">Password</label>
                 <span class="text-sm font-medium text-primary">Lupa password?</span>
             </div>
-            <div class="relative">
+            <div class="relative" x-data="{ showPassword: false }">
                 <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                     <x-filament::icon icon="heroicon-o-lock-closed" class="h-5 w-5" />
                 </div>
-                <input id="password" wire:model.defer="data.password" type="password" placeholder="••••••••" class="w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-10 pr-12 text-slate-900 outline-hidden transition-all focus:border-transparent focus:ring-2 focus:ring-[#47eb7e] dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-100">
-                <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                    <x-filament::icon icon="heroicon-o-eye" class="h-5 w-5" />
+                <input id="password" wire:model.defer="data.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••" class="w-full rounded-lg border border-slate-200 bg-slate-50 py-3 pl-10 pr-12 text-slate-900 outline-hidden transition-all focus:border-transparent focus:ring-2 focus:ring-[#47eb7e] dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-100">
+                <button type="button" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" @click="showPassword = !showPassword">
+                    <x-filament::icon x-show="!showPassword" icon="heroicon-o-eye" class="h-5 w-5" />
+                    <x-filament::icon x-show="showPassword" icon="heroicon-o-eye-slash" class="h-5 w-5" />
                 </button>
             </div>
             @error('data.password') <p class="text-sm text-rose-500">{{ $message }}</p> @enderror

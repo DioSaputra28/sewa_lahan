@@ -40,16 +40,21 @@
                             {{ __('web.lahan.index.filters') }}
                         </h2>
 
-                        <!-- Search (by market name) -->
-                        {{--
                         <div class="mb-6">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Search</label>
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
-                                <input class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary" placeholder="Market name..." type="text" name="q" value="{{ $filters['q'] ?? '' }}" />
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_search') }}</label>
+                            <div class="mb-6">
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+                                    <input
+                                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                                        placeholder="{{ __('web.lahan.index.filter_search_placeholder') }}"
+                                        type="text"
+                                        name="q"
+                                        value="{{ $filters['q'] ?? '' }}"
+                                    />
+                                </div>
                             </div>
                         </div>
-                        --}}
 
                         <!-- Region -->
                         <div class="mb-6">
@@ -69,35 +74,74 @@
                             </div>
                         </div>
 
-                        <!-- Size -->
+                        <!-- Area Range -->
                         <div class="mb-6">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_stall_size') }}</label>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_area_range') }}</label>
                             <div class="grid grid-cols-2 gap-2">
-                                @foreach ($sizeBuckets as $key => $bucket)
-                                    <button type="submit" name="size" value="{{ $key }}"
-                                            class="px-3 py-2 rounded-lg text-xs font-medium transition-colors border {{ $filters['size'] === $key ? 'border-primary bg-primary/10 text-primary' : 'border-slate-200 dark:border-slate-700 hover:border-primary' }}">
-                                        {{ $bucket['label'] }}
-                                    </button>
-                                @endforeach
+                                <input
+                                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                                    placeholder="{{ __('web.lahan.index.filter_area_min') }}"
+                                    type="number"
+                                    min="0"
+                                    step="0.1"
+                                    name="area_min"
+                                    value="{{ $filters['area_min'] ?? '' }}"
+                                />
+                                <input
+                                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                                    placeholder="{{ __('web.lahan.index.filter_area_max') }}"
+                                    type="number"
+                                    min="0"
+                                    step="0.1"
+                                    name="area_max"
+                                    value="{{ $filters['area_max'] ?? '' }}"
+                                />
                             </div>
                         </div>
 
-                        <!-- Price -->
+                        <!-- Price Range -->
                         <div class="mb-6">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_price_month') }}</label>
-                            <div class="space-y-2">
-                                @foreach ($priceBuckets as $key => $bucket)
-                                    <button type="submit" name="price" value="{{ $key }}"
-                                            class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors {{ $filters['price'] === $key ? 'bg-primary/10 text-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400' }}">
-                                        <span class="material-symbols-outlined text-sm">payments</span>
-                                        {{ $bucket['label'] }}
-                                    </button>
-                                @endforeach
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">{{ __('web.lahan.index.filter_price_range') }}</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input
+                                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                                    placeholder="{{ __('web.lahan.index.filter_price_min') }}"
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    name="price_min"
+                                    value="{{ $filters['price_min'] ?? '' }}"
+                                />
+                                <input
+                                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary"
+                                    placeholder="{{ __('web.lahan.index.filter_price_max') }}"
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    name="price_max"
+                                    value="{{ $filters['price_max'] ?? '' }}"
+                                />
                             </div>
                         </div>
+
+                        <button
+                            type="submit"
+                            class="w-full mb-3 py-2.5 bg-primary text-slate-900 font-bold rounded-lg hover:bg-primary/90 transition-colors"
+                        >
+                            {{ __('web.lahan.index.filter_apply') }}
+                        </button>
 
                         <!-- Clear Filters -->
-                        @if ($filters['region'] || $filters['size'] || $filters['price'])
+                        @if (
+                            ($filters['region'] ?? null)
+                            || ($filters['size'] ?? null)
+                            || ($filters['price'] ?? null)
+                            || filled($filters['q'] ?? null)
+                            || filled($filters['price_min'] ?? null)
+                            || filled($filters['price_max'] ?? null)
+                            || filled($filters['area_min'] ?? null)
+                            || filled($filters['area_max'] ?? null)
+                        )
                             <a href="{{ route('lahan.index', ['sort' => $filters['sort'] ?? 'newest']) }}"
                                class="w-full py-2.5 border border-red-200 dark:border-red-800 text-red-500 font-bold rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 text-sm">
                                 <span class="material-symbols-outlined text-sm">clear</span>

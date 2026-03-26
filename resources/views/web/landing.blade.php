@@ -15,6 +15,13 @@
 @endpush
 
 @section('content')
+    @php
+        $siteSettings = site_setting();
+        $landingHeroImageUrl = get_landing_hero_image_url();
+        $landingHeroImageAlt = $siteSettings->landing_hero_image_alt ?: 'Modern indoor market with organized wooden stalls';
+        $listingService = app(App\Services\PublicPlotListingQuery::class);
+    @endphp
+
     <!-- Modern Split Hero Section -->
     <section class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,14 +40,14 @@
                         <a href="{{ route('lahan.index') }}" class="bg-primary hover:bg-primary/90 text-slate-900 px-8 py-4 rounded-xl text-lg font-bold shadow-lg transition-transform active:scale-95 text-center">
                             {{ __('web.landing.browse_stalls') }}
                         </a>
-                        <button class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-8 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                        <a href="#pilih-lahan" class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-8 py-4 rounded-xl text-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-center">
                             {{ __('web.landing.view_map') }}
-                        </button>
+                        </a>
                     </div>
                 </div>
                 <div class="flex-1 w-full relative">
                     <div class="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl relative z-10">
-                        <img class="w-full h-full object-cover" data-alt="Modern indoor market with organized wooden stalls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBD-mRgP8BT6LBqFVhYhVqlU4kbrooSw7otxMVS6lUdXJ0kQt3N3qbjF2bWlhNmmvf8p1sxF82qWDU5Njsz4FZgnQvLiZmJ0ceDtCZKYrkKWV8KZbEynB4U-YtfJ--x-btax7JVLliqIzk7MnYQhh247A_PsE1o_3wYQMrWFws-XGCjnH6mN4LZEhJDR8VEKVRO9YyuBOUZaHApbAOqkbXBsZdyct0i8lPts8xD24NjBGeg2N6Q4s0WATNQqfCLxJdq0aqmGrmiIWd" />
+                        <img class="w-full h-full object-cover" alt="{{ $landingHeroImageAlt }}" src="{{ $landingHeroImageUrl }}" />
                     </div>
                     <div class="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl z-20 hidden md:block border border-slate-100 dark:border-slate-700">
                         <div class="flex items-center gap-4">
@@ -85,9 +92,9 @@
                 <div class="flex-1 min-w-[200px]">
                     <select name="price" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 hover:border-primary transition-colors group text-sm font-medium cursor-pointer appearance-none">
                         <option value="">{{ __('web.landing.filter_price_range') }}</option>
-                        <option value="under_1m">&lt; Rp 1 juta/mo</option>
-                        <option value="1m_to_2m">Rp 1–2 juta/mo</option>
-                        <option value="over_2m">&gt; Rp 2 juta/mo</option>
+                        <option value="under_1m">&lt; Rp 1 JT/bln</option>
+                        <option value="1m_to_2m">Rp 1–2 JT/bln</option>
+                        <option value="over_2m">&gt; Rp 2 JT/bln</option>
                     </select>
                 </div>
                 <button type="submit" class="bg-slate-900 dark:bg-primary dark:text-slate-900 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-opacity">
@@ -181,8 +188,8 @@
         </div>
     </section>
 
-    <!-- Market Map Teaser -->
-    <section class="bg-slate-900 py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- How To Choose Teaser -->
+    <section id="pilih-lahan" class="bg-slate-900 py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 relative z-10">
             <div class="flex-1">
                 <h2 class="text-3xl lg:text-5xl font-black text-white mb-6">{{ __('web.landing.section_map_title') }}</h2>
@@ -203,21 +210,31 @@
                         </div>
                     </div>
                 </div>
-                <button class="bg-primary text-slate-900 px-8 py-4 rounded-xl font-bold flex items-center gap-2">
+                <a href="{{ route('lahan.index') }}" class="inline-flex bg-primary text-slate-900 px-8 py-4 rounded-xl font-bold items-center gap-2">
                     <span class="material-symbols-outlined">map</span>
                     {{ __('web.landing.open_map') }}
-                </button>
+                </a>
             </div>
             <div class="flex-1 w-full">
-                <div class="aspect-square bg-slate-800 rounded-3xl overflow-hidden border-4 border-slate-700 shadow-2xl relative">
-                    <div class="w-full h-full opacity-60">
-                        <img class="w-full h-full object-cover" data-alt="A detailed digital map of a city market area" data-location="Jakarta" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBz7ziiL7OVOi-ahVXkEKF3VkgT7TicxB-h-vJOoFWCJSkmQPxv1xE7anmZj8eHwqfawM6u2Epw1vjH6XGatnPs04XkFFPfexj0NyBXwH1LVTjR5bvtNlOnCKDVD0SV8ubUTnixskL2W-iGQz7vRR8O2r2tv5sSy2UCE8Wzn9Hi69ma7qv20hpSkUt9y93_3XKNr6nQhsetDAFX2ih5MwWZoaZuUIfT5z6IJ8psz3xqgIQAh567-JsPYemIa8TQ_2RzHixFmrenjTKQ" />
-                    </div>
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <div class="size-16 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/20 animate-pulse">
-                            <span class="material-symbols-outlined text-slate-900 text-3xl font-bold">location_on</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @forelse ($previewPlots->take(4) as $previewPlot)
+                        <a
+                            href="{{ route('lahan.show', $previewPlot) }}"
+                            class="rounded-2xl bg-slate-800 border border-slate-700 p-4 shadow-xl hover:border-primary/70 transition-colors"
+                        >
+                            <p class="text-sm text-slate-400 mb-2">{{ $previewPlot->market->city ?? 'Unknown' }}</p>
+                            <h4 class="text-white font-bold leading-tight mb-1">{{ $previewPlot->name }}</h4>
+                            <p class="text-primary text-sm font-semibold">
+                                {{ $listingService->formatPrice($previewPlot->base_price_monthly) }}
+                                <span class="text-slate-400 font-medium">{{ __('web.landing.per_month') }}</span>
+                            </p>
+                        </a>
+                    @empty
+                        <div class="rounded-2xl bg-slate-800 border border-slate-700 p-5">
+                            <p class="text-slate-300 font-semibold mb-1">{{ __('web.landing.empty_no_stalls') }}</p>
+                            <p class="text-sm text-slate-500">{{ __('web.landing.empty_browse_all') }}</p>
                         </div>
-                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>

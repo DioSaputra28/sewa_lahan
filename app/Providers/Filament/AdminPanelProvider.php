@@ -28,6 +28,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName(fn (): string => get_site_name())
+            ->favicon(fn (): ?string => get_versioned_favicon_url())
             ->colors([
                 'primary' => Color::Green,
             ])

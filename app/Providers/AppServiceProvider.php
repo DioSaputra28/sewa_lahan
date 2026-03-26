@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Settings\SiteSetting;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Throwable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->syncApplicationNameFromSiteSetting();
     }
 
     /**
@@ -46,5 +50,18 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    protected function syncApplicationNameFromSiteSetting(): void
+    {
+        try {
+            $siteName = trim((string) app(SiteSetting::class)->site_name);
+
+            if ($siteName !== '') {
+                Config::set('app.name', $siteName);
+            }
+        } catch (Throwable) {
+            // Keep default config value when settings storage is not ready yet.
+        }
     }
 }

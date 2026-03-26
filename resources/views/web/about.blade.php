@@ -1,6 +1,13 @@
 @extends('web.layouts.main')
 
 @section('content')
+@php
+    $siteSettings = site_setting();
+    $aboutHeroImageUrl = get_about_hero_image_url();
+    $aboutHeroImageAlt = $siteSettings->about_hero_image_alt ?: 'Modern Market Interior';
+    $aboutGenesisContent = get_about_genesis_content();
+@endphp
+
 <!-- Main Content -->
 <main class="pt-24 pb-20">
     <!-- Hero Section -->
@@ -15,7 +22,7 @@
             </div>
             <div class="relative group">
                 <div class="absolute -inset-4 bg-primary/20 rounded-3xl blur-2xl group-hover:bg-primary/30 transition-all duration-500"></div>
-                <img alt="Modern Market Interior" class="relative rounded-3xl shadow-2xl object-cover h-[500px] w-full transform group-hover:scale-[1.02] transition-transform duration-500" data-alt="Modern indoor market with wooden stalls and bright lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8qFlBXvKqmfV76EvtiiAAweI_2FdkbI15usg7lSEeOGZ_5IpRk6O9SJcbvgzdPRXzM2gUfuOdT7Je9TqBTTP2GGznp8h99vMVChxpeBSlT5s6oR71XA2yFANDldsIKX-2xw-tJSA4isd4IexBkptH757TjC8ckeYTy4-0giDLLtjh7UxYL8CB9yR1pK0IC5HllbZr3BkndZfFjuQYG7zd3JzfYee2L-lRhiIJjwJfegXtFXN49EvPmM3aurrdtzRyXb5olJ6-jHRB" />
+                <img alt="{{ $aboutHeroImageAlt }}" class="relative rounded-3xl shadow-2xl object-cover h-[500px] w-full transform group-hover:scale-[1.02] transition-transform duration-500" src="{{ $aboutHeroImageUrl }}" />
             </div>
         </div>
     </section>
@@ -27,12 +34,7 @@
                     <h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100 sticky top-32">{{ __('web.about.story_title') }}</h2>
                 </div>
                 <div class="md:w-2/3 space-y-8 text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-                    <p>
-                        {{ __('web.about.story_p1') }}
-                    </p>
-                    <p>
-                        {{ __('web.about.story_p2') }}
-                    </p>
+                    <div>{!! nl2br(e($aboutGenesisContent)) !!}</div>
                     <div class="grid grid-cols-2 gap-8 pt-8">
                         <div>
                             <div class="text-4xl font-black text-primary mb-2">500+</div>

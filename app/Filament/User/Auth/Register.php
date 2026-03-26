@@ -109,6 +109,21 @@ class Register extends \Filament\Auth\Pages\Register
             ->maxLength(255);
     }
 
+    protected function getEmailFormComponent(): Component
+    {
+        return TextInput::make('email')
+            ->label('Alamat email')
+            ->email()
+            ->required()
+            ->maxLength(255)
+            ->unique(table: User::class, column: 'email')
+            ->validationMessages([
+                'required' => 'Alamat email wajib diisi.',
+                'email' => 'Format email tidak valid.',
+                'unique' => 'Email ini sudah terdaftar.',
+            ]);
+    }
+
     public function getSubheading(): string|Htmlable|null
     {
         return null;
