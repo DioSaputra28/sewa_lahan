@@ -6,12 +6,17 @@ use App\Models\BookingRequest;
 use App\Models\Invoice;
 use App\Models\Lease;
 use App\Models\LeasePeriod;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 
 class LeaseDemoSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $paidBooking = BookingRequest::query()
             ->where('payment_status', 'paid')
             ->first();

@@ -6,12 +6,17 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PaymentAttempt;
 use App\Models\PaymentEvent;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 
 class PaymentDemoSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $invoices = Invoice::query()->get()->keyBy('invoice_number');
 
         foreach ($invoices as $invoice) {

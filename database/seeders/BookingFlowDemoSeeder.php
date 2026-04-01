@@ -6,12 +6,17 @@ use App\Models\BookingRequest;
 use App\Models\BookingStatusEvent;
 use App\Models\Plot;
 use App\Models\User;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 
 class BookingFlowDemoSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $admin = User::query()->where('email', 'admin@gmail.com')->firstOrFail();
 
         $customers = User::query()

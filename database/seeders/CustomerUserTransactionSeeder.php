@@ -14,6 +14,7 @@ use App\Models\PaymentAttempt;
 use App\Models\PaymentEvent;
 use App\Models\Plot;
 use App\Models\User;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -21,8 +22,12 @@ use Illuminate\Support\Facades\DB;
 
 class CustomerUserTransactionSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $customer = User::query()->where('email', 'user@gmail.com')->firstOrFail();
         $admin = User::query()->where('email', 'admin@gmail.com')->firstOrFail();
         $plots = Plot::query()

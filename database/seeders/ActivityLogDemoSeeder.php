@@ -8,12 +8,17 @@ use App\Models\Invoice;
 use App\Models\Lease;
 use App\Models\Payment;
 use App\Models\User;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 
 class ActivityLogDemoSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $admin = User::query()->where('email', 'admin@gmail.com')->first();
 
         if (! $admin) {

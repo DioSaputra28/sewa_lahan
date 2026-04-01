@@ -6,10 +6,13 @@ use App\Models\Area;
 use App\Models\Market;
 use App\Models\Plot;
 use App\Models\PlotImage;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 
 class MarketDemoSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     /**
      * Fixed Unsplash image URLs for demo plots (stable across seedings).
      * Each plot gets 2 images: primary (sort_order=1) and secondary (sort_order=2).
@@ -32,6 +35,8 @@ class MarketDemoSeeder extends Seeder
 
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $markets = [
             [
                 'name' => 'Pasar Induk Kebumen',

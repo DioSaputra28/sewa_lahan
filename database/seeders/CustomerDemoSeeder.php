@@ -4,13 +4,18 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use App\Models\User;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class CustomerDemoSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $customerRole = Role::query()->where('name', 'customer')->firstOrFail();
 
         $customers = [

@@ -5,12 +5,17 @@ namespace Database\Seeders;
 use App\Models\BookingRequest;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use Database\Seeders\Concerns\GuardsAgainstProductionSeeding;
 use Illuminate\Database\Seeder;
 
 class InvoiceDemoSeeder extends Seeder
 {
+    use GuardsAgainstProductionSeeding;
+
     public function run(): void
     {
+        $this->guardAgainstProductionSeeding(static::class);
+
         $bookingRequests = BookingRequest::query()
             ->whereIn('status', ['approved', 'expired'])
             ->get();
