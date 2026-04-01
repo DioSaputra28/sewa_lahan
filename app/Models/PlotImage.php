@@ -47,10 +47,25 @@ class PlotImage extends Model
             return $path;
         }
 
-        if (! Storage::exists($path)) {
+        if (str_starts_with($path, '/storage/')) {
+            return $path;
+        }
+
+        $normalizedPath = ltrim($path, '/');
+
+        if (str_starts_with($normalizedPath, 'storage/')) {
+            $normalizedPath = substr($normalizedPath, strlen('storage/'));
+        }
+
+        $publicDisk = Storage::disk('public');
+        if ($publicDisk->exists($normalizedPath)) {
+            return $publicDisk->url($normalizedPath);
+        }
+
+        if (! Storage::exists($normalizedPath)) {
             return null;
         }
 
-        return Storage::url($path);
+        return Storage::url($normalizedPath);
     }
 }
