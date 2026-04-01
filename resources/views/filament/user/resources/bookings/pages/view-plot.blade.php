@@ -2,8 +2,17 @@
     @php
         $plot = $this->plot;
         $imgService = app(\App\Services\PublicPlotListingQuery::class);
-        $monthlyPrice = $imgService->formatPriceFull((int) $plot->base_price_monthly);
-        $yearlyPrice = $imgService->formatPriceFull((int) $plot->base_price_yearly);
+        $hasMonthlyPrice = $plot->base_price_monthly !== null;
+        $hasYearlyPrice = $plot->base_price_yearly !== null;
+        $monthlyPrice = $hasMonthlyPrice ? $imgService->formatPriceFull((int) $plot->base_price_monthly) : null;
+        $yearlyPrice = $hasYearlyPrice ? $imgService->formatPriceFull((int) $plot->base_price_yearly) : null;
+        $displayPrice = $monthlyPrice ?? $yearlyPrice ?? '—';
+        $displayPeriod = $hasMonthlyPrice
+            ? __('web.single.label_per_month')
+            : ($hasYearlyPrice ? __('web.single.label_per_year') : '');
+        $displayPriceSub = $hasMonthlyPrice && $yearlyPrice
+            ? $yearlyPrice.' '.__('web.single.label_per_year')
+            : ($hasYearlyPrice ? __('web.single.price_billed_annually') : '—');
         $dimension = $plot->length.' × '.$plot->width.' m';
         $areaSize = rtrim(rtrim(number_format((float) $plot->area_square_meters, 2, '.', ''), '0'), '.').' m²';
         $floorLabel = $plot->floor_level ?? '—';
@@ -78,10 +87,10 @@
 
                         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900">
                             <div class="mb-1">
-                                <span class="text-3xl font-black text-slate-900 dark:text-white">Rp {{ $monthlyPrice }}</span>
-                                <span class="text-sm text-slate-400">{{ __('web.single.label_per_month') }}</span>
+                                <span class="text-3xl font-black text-slate-900 dark:text-white">{{ $displayPrice }}</span>
+                                <span class="text-sm text-slate-400">{{ $displayPeriod }}</span>
                             </div>
-                            <p class="mb-4 text-xs text-slate-400">Rp {{ $yearlyPrice }} {{ __('web.single.label_per_year') }}</p>
+                            <p class="mb-4 text-xs text-slate-400">{{ $displayPriceSub }}</p>
 
                             <a
                                 href="{{ \App\Filament\User\Resources\Bookings\BookingResource::getUrl('create', ['plot' => $plot->id]) }}"
@@ -196,7 +205,11 @@
                     @foreach ($this->relatedPlots as $relatedPlot)
                         @php
                             $relatedImage = $imgService->primaryImageUrl($relatedPlot);
-                            $relatedPrice = $imgService->formatPrice((int) $relatedPlot->base_price_monthly);
+                            $relatedRawPrice = $relatedPlot->base_price_monthly ?? $relatedPlot->base_price_yearly;
+                            $relatedPrice = $relatedRawPrice !== null ? $imgService->formatPrice((int) $relatedRawPrice) : '—';
+                            $relatedPricePeriod = $relatedPlot->base_price_monthly !== null
+                                ? __('web.single.label_per_month')
+                                : ($relatedPlot->base_price_yearly !== null ? __('web.single.label_per_year') : '—');
                             $relatedSize = $relatedPlot->length.' × '.$relatedPlot->width.' m';
                         @endphp
                         <a
@@ -214,7 +227,7 @@
                                     </div>
                                     <div class="text-right">
                                         <p class="text-sm font-black text-primary">{{ $relatedPrice }}</p>
-                                        <p class="text-[10px] text-slate-400">{{ __('web.single.label_per_month') }}</p>
+                                        <p class="text-[10px] text-slate-400">{{ $relatedPricePeriod }}</p>
                                     </div>
                                 </div>
                             </div>

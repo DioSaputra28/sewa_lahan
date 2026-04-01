@@ -30,8 +30,20 @@
 @php
     $imgService = app(\App\Services\PublicPlotListingQuery::class);
     $plot = $plot; // explicit for clarity
-    $monthlyPrice = $imgService->formatPriceFull($plot->base_price_monthly);
-    $yearlyPrice  = $imgService->formatPriceFull($plot->base_price_yearly);
+    $hasMonthlyPrice = $plot->base_price_monthly !== null;
+    $hasYearlyPrice = $plot->base_price_yearly !== null;
+    $monthlyPrice = $hasMonthlyPrice ? $imgService->formatPriceFull((int) $plot->base_price_monthly) : null;
+    $yearlyPrice = $hasYearlyPrice ? $imgService->formatPriceFull((int) $plot->base_price_yearly) : null;
+    $defaultBillingCycle = $hasMonthlyPrice ? 'monthly' : ($hasYearlyPrice ? 'yearly' : null);
+    $displayPrice = $defaultBillingCycle === 'yearly'
+        ? $yearlyPrice
+        : ($monthlyPrice ?? $yearlyPrice ?? '—');
+    $displayPeriod = $defaultBillingCycle === 'yearly'
+        ? __('web.single.label_per_year')
+        : ($defaultBillingCycle === 'monthly' ? __('web.single.label_per_month') : '');
+    $displayPriceSub = $defaultBillingCycle === 'monthly' && $yearlyPrice
+        ? __('web.single.label_per_year').' '.$yearlyPrice
+        : ($defaultBillingCycle === 'yearly' ? __('web.single.price_billed_annually') : '—');
     $dimension = $plot->length . ' × ' . $plot->width . ' m';
     $areaSize = rtrim(rtrim(number_format($plot->area_square_meters, 2, '.', ''), '0'), '.') . ' m²';
     $floorLabel = $plot->floor_level ?? '—';
@@ -134,20 +146,36 @@
                 <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                     {{-- Billing Toggle --}}
                     <div class="flex bg-slate-100 rounded-xl p-1 mb-5">
-                        <button id="toggle-monthly" class="flex-1 py-2 text-sm font-bold rounded-lg bg-white text-slate-900 shadow-sm transition-all">
+                        <button id="toggle-monthly"
+                            @class([
+                                'flex-1 py-2 text-sm font-bold rounded-lg transition-all',
+                                'bg-white text-slate-900 shadow-sm' => $defaultBillingCycle === 'monthly' && $hasMonthlyPrice,
+                                'text-slate-500 hover:text-slate-700' => $defaultBillingCycle !== 'monthly' && $hasMonthlyPrice,
+                                'cursor-not-allowed text-slate-300' => ! $hasMonthlyPrice,
+                            ])
+                            @disabled(! $hasMonthlyPrice)
+                        >
                             {{ __('web.single.label_monthly') }}
                         </button>
-                        <button id="toggle-yearly" class="flex-1 py-2 text-sm font-bold rounded-lg text-slate-500 hover:text-slate-700 transition-all">
+                        <button id="toggle-yearly"
+                            @class([
+                                'flex-1 py-2 text-sm font-bold rounded-lg transition-all',
+                                'bg-white text-slate-900 shadow-sm' => $defaultBillingCycle === 'yearly' && $hasYearlyPrice,
+                                'text-slate-500 hover:text-slate-700' => $defaultBillingCycle !== 'yearly' && $hasYearlyPrice,
+                                'cursor-not-allowed text-slate-300' => ! $hasYearlyPrice,
+                            ])
+                            @disabled(! $hasYearlyPrice)
+                        >
                             {{ __('web.single.label_yearly') }} <span class="text-xs font-normal text-slate-400">{{ __('web.single.label_discount') }}</span>
                         </button>
                     </div>
 
                     {{-- Price Display --}}
                     <div class="mb-1">
-                        <span id="price-display" class="text-4xl font-black text-slate-900">{{ $monthlyPrice }}</span>
-                        <span class="text-slate-400 text-sm">/<span id="price-period">{{ __('web.single.label_per_month') }}</span></span>
+                        <span id="price-display" class="text-4xl font-black text-slate-900">{{ $displayPrice }}</span>
+                        <span id="price-period" class="text-slate-400 text-sm">{{ $displayPeriod }}</span>
                     </div>
-                    <p id="price-sub" class="text-xs text-slate-400 mb-6">{{ __('web.single.label_per_year') }} {{ $yearlyPrice }}</p>
+                    <p id="price-sub" class="text-xs text-slate-400 mb-6">{{ $displayPriceSub }}</p>
 
                     <a href="{{ $rentNowUrl }}" class="inline-flex w-full items-center justify-center py-4 bg-primary hover:bg-primary/90 text-slate-900 font-bold text-base rounded-xl shadow-md transition-all active:scale-[0.98]">
                         {{ __('web.single.btn_rent_now') }}
@@ -310,7 +338,11 @@
                     @foreach ($related as $relPlot)
                         @php
                             $relImg = $imgService->primaryImageUrl($relPlot);
-                            $relPrice = $imgService->formatPrice($relPlot->base_price_monthly);
+                            $relRawPrice = $relPlot->base_price_monthly ?? $relPlot->base_price_yearly;
+                            $relPrice = $relRawPrice !== null ? $imgService->formatPrice((int) $relRawPrice) : '—';
+                            $relPricePeriod = $relPlot->base_price_monthly !== null
+                                ? __('web.single.label_per_month')
+                                : ($relPlot->base_price_yearly !== null ? __('web.single.label_per_year') : '—');
                             $relSize = $relPlot->length . ' × ' . $relPlot->width . ' m';
                         @endphp
                         <a href="{{ route('lahan.show', $relPlot) }}"
@@ -334,7 +366,7 @@
                                     </div>
                                     <div class="text-right">
                                         <p class="text-sm font-black text-primary">{{ $relPrice }}</p>
-                                        <p class="text-[10px] text-slate-400">{{ __('web.single.label_per_month') }}</p>
+                                        <p class="text-[10px] text-slate-400">{{ $relPricePeriod }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -353,31 +385,82 @@
         const priceDisplay = document.getElementById('price-display');
         const pricePeriod = document.getElementById('price-period');
         const priceSub = document.getElementById('price-sub');
+        if (!btnMonthly || !btnYearly || !priceDisplay || !pricePeriod || !priceSub) {
+            return;
+        }
+
         const monthlyPrice = {{ Js::from($monthlyPrice) }};
         const yearlyPrice = {{ Js::from($yearlyPrice) }};
+        const hasMonthlyPrice = {{ Js::from($hasMonthlyPrice) }};
+        const hasYearlyPrice = {{ Js::from($hasYearlyPrice) }};
         const labelPerMonth = {{ Js::from(__('web.single.label_per_month')) }};
         const labelPerYear = {{ Js::from(__('web.single.label_per_year')) }};
         const billedAnnually = {{ Js::from(__('web.single.price_billed_annually')) }};
+        const fallbackPrice = '—';
 
-        btnYearly.addEventListener('click', () => {
-            btnYearly.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
-            btnYearly.classList.remove('text-slate-500');
-            btnMonthly.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
-            btnMonthly.classList.add('text-slate-500');
-            priceDisplay.textContent = yearlyPrice;
-            pricePeriod.textContent = 'year';
+        const updateButtonState = (button, isActive, isAvailable) => {
+            button.classList.remove('bg-white', 'text-slate-900', 'shadow-sm', 'text-slate-500', 'hover:text-slate-700', 'text-slate-300', 'cursor-not-allowed');
+
+            if (!isAvailable) {
+                button.disabled = true;
+                button.classList.add('text-slate-300', 'cursor-not-allowed');
+                return;
+            }
+
+            button.disabled = false;
+            if (isActive) {
+                button.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+                return;
+            }
+
+            button.classList.add('text-slate-500', 'hover:text-slate-700');
+        };
+
+        const renderMonthly = () => {
+            if (!hasMonthlyPrice) {
+                return;
+            }
+
+            updateButtonState(btnMonthly, true, hasMonthlyPrice);
+            updateButtonState(btnYearly, false, hasYearlyPrice);
+            priceDisplay.textContent = monthlyPrice ?? fallbackPrice;
+            pricePeriod.textContent = labelPerMonth;
+            priceSub.textContent = hasYearlyPrice && yearlyPrice ? `${labelPerYear} ${yearlyPrice}` : fallbackPrice;
+        };
+
+        const renderYearly = () => {
+            if (!hasYearlyPrice) {
+                return;
+            }
+
+            updateButtonState(btnMonthly, false, hasMonthlyPrice);
+            updateButtonState(btnYearly, true, hasYearlyPrice);
+            priceDisplay.textContent = yearlyPrice ?? fallbackPrice;
+            pricePeriod.textContent = labelPerYear;
             priceSub.textContent = billedAnnually;
-        });
+        };
 
-        btnMonthly.addEventListener('click', () => {
-            btnMonthly.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
-            btnMonthly.classList.remove('text-slate-500');
-            btnYearly.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
-            btnYearly.classList.add('text-slate-500');
-            priceDisplay.textContent = monthlyPrice;
-            pricePeriod.textContent = 'month';
-            priceSub.textContent = labelPerYear + ' ' + yearlyPrice;
-        });
+        if (hasMonthlyPrice) {
+            btnMonthly.addEventListener('click', renderMonthly);
+        }
+        if (hasYearlyPrice) {
+            btnYearly.addEventListener('click', renderYearly);
+        }
+
+        if (hasMonthlyPrice) {
+            renderMonthly();
+            return;
+        }
+        if (hasYearlyPrice) {
+            renderYearly();
+            return;
+        }
+
+        updateButtonState(btnMonthly, false, false);
+        updateButtonState(btnYearly, false, false);
+        priceDisplay.textContent = fallbackPrice;
+        pricePeriod.textContent = '';
+        priceSub.textContent = fallbackPrice;
     }
 
 	    // ─── Image Gallery ─────────────────────────────────────────────────────────

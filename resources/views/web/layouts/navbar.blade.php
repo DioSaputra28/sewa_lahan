@@ -45,10 +45,6 @@
                 </nav>
             </div>
             <div class="flex items-center gap-4">
-                <div class="hidden lg:flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1.5 border border-transparent focus-within:border-primary">
-                    <span class="material-symbols-outlined text-slate-400 text-lg">search</span>
-                    <input class="bg-transparent border-none focus:ring-0 text-sm w-40 placeholder:text-slate-500" placeholder="{{ __('web.nav.search_placeholder') }}"/>
-                </div>
                 <div class="hidden md:flex items-center gap-1">
                     <form action="{{ route('locale.switch', ['locale' => 'id']) }}" method="POST">
                         @csrf
