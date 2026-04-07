@@ -77,7 +77,20 @@
             </div>
         </div>
         <div class="border-t border-slate-100 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-sm text-slate-400">{{ __('web.footer.copyright', ['year' => date('Y')]) }}</p>
+            <div class="flex flex-col items-center gap-2 text-center md:items-start md:text-left">
+                <p class="text-sm text-slate-400">{{ __('web.footer.copyright', ['year' => now()->year, 'siteName' => $siteName]) }}</p>
+                <p class="text-sm text-slate-400">
+                    {{ __('web.footer.developed_by') }}
+                    <a
+                        class="font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 transition-colors hover:text-primary dark:text-slate-300 dark:decoration-slate-600"
+                        href="https://www.bibakuteknologi.com/"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                    >
+                        Bibaku Teknologi
+                    </a>
+                </p>
+            </div>
             <div class="flex gap-6 text-sm text-slate-400">
                 <a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.privacy') }}</a>
                 <a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.terms') }}</a>

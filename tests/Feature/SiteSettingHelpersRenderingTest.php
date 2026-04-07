@@ -153,6 +153,19 @@ it('renders footer links from existing pages and market data without social icon
         ->assertDontSee('aria-label="X"', escape: false);
 });
 
+it('renders footer copyright with dynamic site name and Bibaku Teknologi credit', function () {
+    $settings = app(SiteSetting::class);
+    $settings->site_name = 'Bibaku Market';
+    $settings->save();
+
+    get('/')
+        ->assertSuccessful()
+        ->assertSee('© '.date('Y').' Bibaku Market. Hak cipta dilindungi.')
+        ->assertSee('Developed by')
+        ->assertSee('Bibaku Teknologi')
+        ->assertSee('href="https://www.bibakuteknologi.com/"', escape: false);
+});
+
 it('renders whatsapp contact item as clickable link when whatsapp number is available', function () {
     $settings = app(SiteSetting::class);
     $settings->office_whatsapp = '+6281234567890';
