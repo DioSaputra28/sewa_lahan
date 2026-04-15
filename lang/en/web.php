@@ -35,7 +35,6 @@ return [
 
     // ─── Landing Page ──────────────────────────────────────────────────────────
     'landing' => [
-        'hero_badge' => 'Now available in 12 major cities',
         'hero_title' => 'Find the Best Stall Location for Your Business',
         'hero_subtitle' => 'Choose strategic market spaces in high-traffic areas. Fast process, transparent pricing, and complete listing details to help you decide with confidence.',
         'browse_stalls' => 'Browse Stalls',
@@ -72,7 +71,6 @@ return [
         'story_p1' => 'PasarSpace began in 2024 with a simple observation: while the world was moving online, the soul of our communities—the local market—was being left behind. Traditional vendors possessed incredible craft but lacked the modern spaces to compete in a high-expectation retail environment.',
         'story_p2' => 'We set out to redesign the "stall" as a high-performance modular asset. By integrating architectural excellence with logistical smarts, we\'ve created a platform where any vendor can step into a premium retail experience without the massive overhead of a traditional storefront.',
         'stat_stalls' => 'Active Stalls',
-        'stat_cities' => 'Cities Reclaimed',
         'dna_badge' => 'Our DNA',
         'dna_title' => 'Built on Principles.',
         'value_transparency' => 'Transparency',

@@ -27,9 +27,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row items-center gap-12">
                 <div class="flex-1 text-left lg:pr-8">
-                    <div class="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold leading-6 text-primary ring-1 ring-inset ring-primary/20 mb-6">
-                        <span>{{ __('web.landing.hero_badge') }}</span>
-                    </div>
                     <h1 class="text-5xl lg:text-7xl font-black text-slate-900 dark:text-slate-50 leading-[1.1] tracking-tight mb-6">
                         {{ __('web.landing.hero_title') }}
                     </h1>
@@ -48,17 +45,6 @@
                 <div class="flex-1 w-full relative">
                     <div class="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl relative z-10">
                         <img class="w-full h-full object-cover" alt="{{ $landingHeroImageAlt }}" src="{{ $landingHeroImageUrl }}" />
-                    </div>
-                    <div class="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-xl z-20 hidden md:block border border-slate-100 dark:border-slate-700">
-                        <div class="flex items-center gap-4">
-                            <div class="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined">trending_up</span>
-                            </div>
-                            <div>
-                                <p class="text-sm font-bold">1.2k+ Active Vendors</p>
-                                <p class="text-xs text-slate-500">Joining this month</p>
-                            </div>
-                        </div>
                     </div>
                     <div class="absolute -top-10 -right-10 size-64 bg-primary/10 rounded-full blur-3xl -z-10"></div>
                 </div>

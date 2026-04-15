@@ -35,7 +35,6 @@ return [
 
     // ─── Landing Page ──────────────────────────────────────────────────────────
     'landing' => [
-        'hero_badge' => 'Sudah hadir di 12 kota',
         'hero_title' => 'Cari Stall yang Tepat, Mulai Jualan Lebih Cepat',
         'hero_subtitle' => 'Pilih lahan dagang yang strategis dengan info lengkap, harga jelas, dan proses sewa yang mudah dari awal sampai deal.',
         'browse_stalls' => 'Jelajahi Stall',
@@ -72,7 +71,6 @@ return [
         'story_p1' => 'PasarSpace lahir dari kebutuhan yang sering kami temui di lapangan: banyak pedagang punya produk bagus, tapi sulit menemukan lokasi jualan yang tepat, jelas biayanya, dan proses sewanya tidak ribet.',
         'story_p2' => 'Karena itu, kami membangun platform yang memudahkan pencarian stall dari data yang dibutuhkan langsung: lokasi, ukuran, harga, hingga status ketersediaan. Tujuannya sederhana, bantu pedagang ambil keputusan lebih cepat dan lebih yakin.',
         'stat_stalls' => 'Stall Aktif',
-        'stat_cities' => 'Kota Operasional',
         'dna_badge' => 'DNA Kami',
         'dna_title' => 'Dibangun dari Prinsip yang Jelas.',
         'value_transparency' => 'Transparansi',
@@ -110,7 +108,7 @@ return [
         'subject_sustainability' => 'Keberlanjutan',
         'submit' => 'Kirim Pesan',
         'hq_title' => 'Kantor Pusat Kami',
-        'office_label' => 'Kantor Jakarta',
+        'office_label' => 'Kantor Pusat',
         'phone_label' => 'Telepon',
         'email_label' => 'Email',
         'social_title' => 'Media Sosial',

@@ -35,14 +35,10 @@
                 </div>
                 <div class="md:w-2/3 space-y-8 text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
                     <div>{!! nl2br(e($aboutGenesisContent)) !!}</div>
-                    <div class="grid grid-cols-2 gap-8 pt-8">
+                    <div class="grid grid-cols-1 gap-8 pt-8">
                         <div>
                             <div class="text-4xl font-black text-primary mb-2">500+</div>
                             <div class="text-sm font-bold uppercase tracking-widest opacity-60">{{ __('web.about.stat_stalls') }}</div>
-                        </div>
-                        <div>
-                            <div class="text-4xl font-black text-primary mb-2">12</div>
-                            <div class="text-sm font-bold uppercase tracking-widest opacity-60">{{ __('web.about.stat_cities') }}</div>
                         </div>
                     </div>
                 </div>
