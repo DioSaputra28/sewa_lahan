@@ -50,9 +50,9 @@ it('shows complete plot detail sections on the user plot page', function () {
         ->assertSuccessful()
         ->assertSee('Detail Lokasi')
         ->assertSee('Detail Lahan')
-        ->assertSee('Tentang Stall Ini')
+        ->assertSee('Tentang Lapak Ini')
         ->assertSee('Fasilitas')
-        ->assertSee('Stall Serupa di Sekitar');
+        ->assertSee('Lapak Serupa di Sekitar');
 });
 
 it('uses custom action labels on the booking create page', function () {

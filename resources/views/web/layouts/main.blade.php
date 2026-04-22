@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>{{ get_site_name() }} - Modern Market Stall Rentals</title>
+    <title>{{ get_site_name() }} - Modern Market Lapak Rentals</title>
     @php
         $faviconUrl = get_versioned_favicon_url();
     @endphp

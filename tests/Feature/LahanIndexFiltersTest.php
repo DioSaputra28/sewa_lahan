@@ -33,7 +33,7 @@ it('filters lahan by search query on plot name and market city', function () {
         'market_id' => $bandungMarket->id,
         'area_id' => null,
         'name' => 'Lapak Sayur Segar',
-        'type' => 'stall',
+        'type' => 'lapak',
         'length' => 2,
         'width' => 2,
         'area_square_meters' => 4,

@@ -35,10 +35,18 @@
                 </div>
                 <div class="md:w-2/3 space-y-8 text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
                     <div>{!! nl2br(e($aboutGenesisContent)) !!}</div>
-                    <div class="grid grid-cols-1 gap-8 pt-8">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 pt-8">
                         <div>
                             <div class="text-4xl font-black text-primary mb-2">500+</div>
                             <div class="text-sm font-bold uppercase tracking-widest opacity-60">{{ __('web.about.stat_stalls') }}</div>
+                        </div>
+                        <div>
+                            <div class="text-4xl font-black text-primary mb-2">50 ha</div>
+                            <div class="text-sm font-bold uppercase tracking-widest opacity-60">{{ __('web.about.stat_land_available') }}</div>
+                        </div>
+                        <div>
+                            <div class="text-4xl font-black text-primary mb-2">5000 ++</div>
+                            <div class="text-sm font-bold uppercase tracking-widest opacity-60">{{ __('web.about.stat_product_variants') }}</div>
                         </div>
                     </div>
                 </div>
@@ -89,7 +97,7 @@
             <div class="relative z-10">
                 <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-8">{{ __('web.about.cta_title') }}</h2>
                 <div class="flex flex-col md:flex-row justify-center gap-4">
-                    <button class="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-10 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all active:scale-95">{{ __('web.about.cta_explore') }}</button>
+                    <a href="{{ route('lahan.index') }}" class="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-10 py-5 rounded-2xl font-bold text-lg hover:shadow-2xl transition-all active:scale-95">{{ __('web.about.cta_explore') }}</a>
                     <button class="bg-transparent border-2 border-slate-300 text-slate-700 dark:border-slate-600 dark:text-slate-200 px-10 py-5 rounded-2xl font-bold text-lg hover:bg-slate-200/60 dark:hover:bg-slate-700/50 transition-all">{{ __('web.about.cta_partner') }}</button>
                 </div>
             </div>
