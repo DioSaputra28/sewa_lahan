@@ -18,6 +18,7 @@ return [
     'footer' => [
         'brand_description' => 'Platform untuk cari, kelola, dan sewa lapak pasar dengan proses yang cepat, jelas, dan praktis.',
         'market_locations' => 'Lokasi Pasar',
+        'office_location' => 'Lokasi Kantor',
         'resources' => 'Sumber Daya',
         'stay_updated' => 'Tetap Terupdate',
         'email_placeholder' => 'Alamat email',

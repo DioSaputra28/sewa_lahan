@@ -18,6 +18,7 @@ return [
     'footer' => [
         'brand_description' => 'The leading platform for market lapak management and rentals across Southeast Asia. Bridging traditional commerce and digital ease.',
         'market_locations' => 'Market Locations',
+        'office_location' => 'Office Location',
         'resources' => 'Resources',
         'stay_updated' => 'Stay Updated',
         'email_placeholder' => 'Email address',

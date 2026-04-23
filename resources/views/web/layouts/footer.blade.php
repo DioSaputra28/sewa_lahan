@@ -2,17 +2,7 @@
     @php
         $siteName = get_site_name();
         $siteLogoUrl = get_site_logo_url();
-        $marketLocations = \App\Models\Plot::query()
-            ->with('market:id,city,status')
-            ->where('status', 'available')
-            ->whereHas('market', fn ($query) => $query->where('status', 'active'))
-            ->get()
-            ->pluck('market.city')
-            ->filter()
-            ->unique()
-            ->sort()
-            ->take(4)
-            ->values();
+        $officeLocation = get_office_location();
         $resourceLinks = [
             ['label' => __('web.footer.resource_home'), 'url' => route('home')],
             ['label' => __('web.footer.resource_about'), 'url' => route('about')],
@@ -37,20 +27,15 @@
                 <p class="text-slate-500 text-sm mb-6">{{ __('web.footer.brand_description') }}</p>
             </div>
             <div>
-                <h4 class="font-bold mb-6">{{ __('web.footer.market_locations') }}</h4>
+                <h4 class="font-bold mb-6">{{ __('web.footer.office_location') }}</h4>
                 <ul class="space-y-4 text-sm text-slate-500">
-                    @forelse ($marketLocations as $marketLocation)
+                    @if (filled($officeLocation))
                         <li>
-                            <a
-                                class="hover:text-primary transition-colors"
-                                href="{{ route('lahan.index', ['region' => $marketLocation]) }}"
-                            >
-                                {{ $marketLocation }}
-                            </a>
+                            <p class="leading-6 whitespace-pre-line">{{ $officeLocation }}</p>
                         </li>
-                    @empty
+                    @else
                         <li><a class="hover:text-primary transition-colors" href="{{ route('lahan.index') }}">{{ __('web.footer.resource_lahan') }}</a></li>
-                    @endforelse
+                    @endif
                 </ul>
             </div>
             <div>
@@ -79,17 +64,6 @@
         <div class="border-t border-slate-100 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex flex-col items-center gap-2 text-center md:items-start md:text-left">
                 <p class="text-sm text-slate-400">{{ __('web.footer.copyright', ['year' => now()->year, 'siteName' => $siteName]) }}</p>
-                <p class="text-sm text-slate-400">
-                    {{ __('web.footer.developed_by') }}
-                    <a
-                        class="font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 transition-colors hover:text-primary dark:text-slate-300 dark:decoration-slate-600"
-                        href="https://www.bibakuteknologi.com/"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                    >
-                        Bibaku Teknologi
-                    </a>
-                </p>
             </div>
             <div class="flex gap-6 text-sm text-slate-400">
                 <a class="hover:text-primary transition-colors" href="#">{{ __('web.footer.privacy') }}</a>

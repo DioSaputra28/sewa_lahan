@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Market;
-use App\Models\Plot;
 use App\Settings\SiteSetting;
 
 use function Pest\Laravel\get;
@@ -117,26 +115,10 @@ it('hides contact social media section when all social links are empty', functio
         ->assertDontSee('aria-label="X"', escape: false);
 });
 
-it('renders footer links from existing pages and market data without social icons', function () {
-    $market = Market::query()->create([
-        'name' => 'Pasar Senen',
-        'address' => 'Jl. Senen No. 1',
-        'city' => 'Jakarta',
-        'status' => 'active',
-    ]);
-
-    Plot::query()->create([
-        'market_id' => $market->id,
-        'area_id' => null,
-        'name' => 'Kios A1',
-        'type' => 'kiosk',
-        'length' => 2.0,
-        'width' => 2.0,
-        'area_square_meters' => 4.0,
-        'base_price_monthly' => 900000,
-        'base_price_yearly' => 10000000,
-        'status' => 'available',
-    ]);
+it('renders footer market location from office location site setting without social icons', function () {
+    $settings = app(SiteSetting::class);
+    $settings->office_location = "Jl. Pasar Induk No. 12\nJakarta Timur";
+    $settings->save();
 
     get('/')
         ->assertSuccessful()
@@ -144,7 +126,9 @@ it('renders footer links from existing pages and market data without social icon
         ->assertSee(route('about'), escape: false)
         ->assertSee(route('lahan.index'), escape: false)
         ->assertSee(route('contact'), escape: false)
-        ->assertSee(route('lahan.index', ['region' => 'Jakarta']), escape: false)
+        ->assertSee('Lokasi Kantor')
+        ->assertSee('Jl. Pasar Induk No. 12')
+        ->assertSee('Jakarta Timur')
         ->assertDontSee('aria-label="YouTube"', escape: false)
         ->assertDontSee('aria-label="Instagram"', escape: false)
         ->assertDontSee('aria-label="TikTok"', escape: false)
@@ -153,7 +137,18 @@ it('renders footer links from existing pages and market data without social icon
         ->assertDontSee('aria-label="X"', escape: false);
 });
 
-it('renders footer copyright with dynamic site name and Bibaku Teknologi credit', function () {
+it('falls back to lahan link in footer when office location is empty', function () {
+    $settings = app(SiteSetting::class);
+    $settings->office_location = '   ';
+    $settings->save();
+
+    get('/')
+        ->assertSuccessful()
+        ->assertSee('Lokasi Kantor')
+        ->assertSee(route('lahan.index'), escape: false);
+});
+
+it('renders footer copyright with dynamic site name only', function () {
     $settings = app(SiteSetting::class);
     $settings->site_name = 'Bibaku Market';
     $settings->save();
@@ -161,9 +156,9 @@ it('renders footer copyright with dynamic site name and Bibaku Teknologi credit'
     get('/')
         ->assertSuccessful()
         ->assertSee('© '.date('Y').' Bibaku Market. Hak cipta dilindungi.')
-        ->assertSee('Developed by')
-        ->assertSee('Bibaku Teknologi')
-        ->assertSee('href="https://www.bibakuteknologi.com/"', escape: false);
+        ->assertDontSee('Developed by')
+        ->assertDontSee('Bibaku Teknologi')
+        ->assertDontSee('href="https://www.bibakuteknologi.com/"', escape: false);
 });
 
 it('renders whatsapp contact item as clickable link when whatsapp number is available', function () {
